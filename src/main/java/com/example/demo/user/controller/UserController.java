@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     final private UserService userService;
     @PostMapping("/sign-up")
-    public boolean userSighUp(@RequestBody UserSignUpForm userSignUpForm){
+    public boolean userSignUp(@RequestBody UserSignUpForm userSignUpForm){
         return userService.signUp(userSignUpForm);
     }
 }
