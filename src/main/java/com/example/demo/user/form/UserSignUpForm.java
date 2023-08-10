@@ -1,0 +1,19 @@
+package com.example.demo.user.form;
+
+import com.example.demo.user.entity.RoleType;
+import com.example.demo.user.entity.User;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
+public class UserSignUpForm {
+    final private String email;
+    final private String password;
+    final private RoleType roleType;
+
+    public User toUser(String password) {
+        return new User(email, password);
+    }
+
+}
