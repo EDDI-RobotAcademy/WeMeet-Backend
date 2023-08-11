@@ -84,11 +84,11 @@ jobs:
             fi
             echo "pass mysql-container"
 
-            if [[ "$(docker ps -qa --filter ancestor=team-project/wemeet-backend-server:latest)" ]]; then
-              docker rm -f $(docker ps -qa --filter ancestor=team-project/wemeet-backend-server:latest)
+            if [[ "$(docker ps -qa --filter ancestor=wemeet-backend-server:latest)" ]]; then
+              docker rm -f $(docker ps -qa --filter ancestor=wemeet-backend-server:latest)
 
             fi
-            echo "pass team-project/wemeet-backend-server:latest"
+            echo "pass wemeet-backend-server:latest"
 
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GHCR_TOKEN }}
 
