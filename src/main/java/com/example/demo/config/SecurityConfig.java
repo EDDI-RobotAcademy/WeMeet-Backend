@@ -60,7 +60,7 @@ public class SecurityConfig {
                             .permitAll();
                     authorizeRequests.requestMatchers("/user")
                             .hasAnyRole("NORMAL");
-                    authorizeRequests.requestMatchers("/jwt/refresh")
+                    authorizeRequests.requestMatchers("/jwt/refresh", "/user/sign-out")
                             .authenticated();
                 })
                 .build();
