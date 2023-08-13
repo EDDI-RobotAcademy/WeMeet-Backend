@@ -17,7 +17,7 @@ import java.util.Map;
 @Component
 @Slf4j
 public class JwtUtil {
-    @Value("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz")
+    @Value("${jwt.secrets}")
     private String key;
     @Value("${uri.exclude.tokenCheckFilter}")
     private List<String> tokenCheckFilterExcludeUris;
