@@ -29,7 +29,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
         Gson gson = new Gson();
-        String jsonStr = gson.toJson(Map.of("accessToken", accessToken, "refreshToken", refreshToken, "role", role));
+        String jsonStr = gson.toJson(Map.of("accessToken", accessToken, "refreshToken", refreshToken));
 
         out.write(jsonStr);
         out.flush();
