@@ -31,7 +31,7 @@ public class JwtUtil {
         return false;
     }
 
-    public String generateToken(Map<String, Object> valueMap, int minutes) {
+    public String generateToken(Map<String, Object> valueMap, long minutes) {
         //헤더 부분
         Map<String, Object> headers = new HashMap<>();
         headers.put("typ", "JWT");

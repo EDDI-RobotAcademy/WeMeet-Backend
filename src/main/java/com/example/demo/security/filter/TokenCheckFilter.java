@@ -1,6 +1,7 @@
 package com.example.demo.security.filter;
 
 import com.example.demo.security.exception.AccessTokenException;
+import com.example.demo.security.service.RedisService;
 import com.example.demo.security.utils.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -9,6 +10,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +25,7 @@ import java.util.Map;
 public class TokenCheckFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+    private final RedisService redisService;
 
     private static String getJwtToken(HttpServletRequest request) {
         String headerStr = request.getHeader("Authorization");
@@ -61,7 +64,8 @@ public class TokenCheckFilter extends OncePerRequestFilter {
         }
         try {
             Map<String, Object> tokenPayload = validateAccessToken(request);
-            String username = (String) tokenPayload.get("email");
+            String tokenStr = request.getHeader("Authorization").substring(7);
+            String username = redisService.getValueByKey(tokenStr);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);

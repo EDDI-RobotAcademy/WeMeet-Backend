@@ -5,6 +5,7 @@ import com.example.demo.security.filter.JwtLoginFilter;
 import com.example.demo.security.filter.TokenCheckFilter;
 import com.example.demo.security.handler.JwtLoginFailHandler;
 import com.example.demo.security.handler.JwtLoginSuccessHandler;
+import com.example.demo.security.service.RedisService;
 import com.example.demo.security.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +27,7 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 public class SecurityConfig {
     final CustomUserDetailsService customUserDetailsService;
     final JwtUtil jwtUtil;
+    final RedisService redisService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -44,20 +46,20 @@ public class SecurityConfig {
 
         JwtLoginFilter jwtLoginFilter = new JwtLoginFilter("/user/sign-in");
         jwtLoginFilter.setAuthenticationManager(authenticationManager);
-        jwtLoginFilter.setAuthenticationSuccessHandler(new JwtLoginSuccessHandler(jwtUtil));
+        jwtLoginFilter.setAuthenticationSuccessHandler(new JwtLoginSuccessHandler(jwtUtil, redisService));
         jwtLoginFilter.setAuthenticationFailureHandler(new JwtLoginFailHandler());
 
         http.addFilterBefore(jwtLoginFilter, UsernamePasswordAuthenticationFilter.class);
 
-        TokenCheckFilter tokenCheckFilter = new TokenCheckFilter(jwtUtil, customUserDetailsService);
+        TokenCheckFilter tokenCheckFilter = new TokenCheckFilter(jwtUtil, customUserDetailsService, redisService);
         http.addFilterBefore(tokenCheckFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http
                 .authorizeHttpRequests((authorizeRequests) -> {
                     authorizeRequests.requestMatchers("/user/sign-up")
                             .permitAll();
-                    authorizeRequests.requestMatchers("")
-                            .hasAnyRole("NORMAL", "ADMIN");
+                    authorizeRequests.requestMatchers("/user")
+                            .hasAnyRole("NORMAL");
 //                    authorizeRequests.requestMatchers("")
 //                            .hasAnyRole("ADMIN");
                 })

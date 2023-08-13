@@ -15,6 +15,11 @@ public class UserRole {
     @ManyToOne(fetch = FetchType.LAZY)
     private Role role;
 
+    @Override
+    public String toString() {
+        return role.toString();
+    }
+
     public UserRole(User user, Role role) {
         this.user = user;
         this.role = role;

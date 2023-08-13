@@ -1,5 +1,6 @@
 package com.example.demo.security.handler;
 
+import com.example.demo.security.service.RedisService;
 import com.example.demo.security.utils.JwtUtil;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
@@ -18,13 +19,19 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtUtil jwtUtil;
+    private final RedisService redisService;
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         String username = authentication.getName();
         String role = getUserRole(authentication);
 
-        String accessToken = jwtUtil.generateToken(Map.of("email", username), 10);
-        String refreshToken = jwtUtil.generateToken(Map.of("email", username), 60);
+        long accessTokenExpMin = 10;
+        String accessToken = jwtUtil.generateToken(Map.of("email", username), accessTokenExpMin);
+        redisService.setKeyAndValue(accessToken, username, accessTokenExpMin+1);
+
+        long refreshTokenExpMin = 60;
+        String refreshToken = jwtUtil.generateToken(Map.of("email", username), refreshTokenExpMin);
+        redisService.setKeyAndValue(accessToken, username, refreshTokenExpMin+1);
 
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();

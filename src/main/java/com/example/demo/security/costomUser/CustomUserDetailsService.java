@@ -2,6 +2,7 @@ package com.example.demo.security.costomUser;
 
 import com.example.demo.user.entity.User;
 import com.example.demo.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+@Transactional
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
     final UserRepository userRepository;
@@ -29,7 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return CustomUserDetails.builder()
                 .username(email)
                 .password(user.getPassword())
-                .authorities(Collections.singleton(new SimpleGrantedAuthority("ROLE_"+user.getUserRole())))
+                .authorities(Collections.singleton(new SimpleGrantedAuthority("ROLE_"+user.getUserRole().toString())))
                 .isEnabled(true)
                 .isCredentialsNonExpired(true)
                 .isAccountNonLocked(true)
