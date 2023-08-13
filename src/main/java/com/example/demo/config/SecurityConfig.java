@@ -60,8 +60,8 @@ public class SecurityConfig {
                             .permitAll();
                     authorizeRequests.requestMatchers("/user")
                             .hasAnyRole("NORMAL");
-//                    authorizeRequests.requestMatchers("")
-//                            .hasAnyRole("ADMIN");
+                    authorizeRequests.requestMatchers("/jwt/refresh")
+                            .authenticated();
                 })
                 .build();
     }
