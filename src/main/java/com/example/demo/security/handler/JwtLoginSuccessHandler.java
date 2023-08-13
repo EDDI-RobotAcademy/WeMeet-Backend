@@ -31,7 +31,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         long refreshTokenExpMin = 60;
         String refreshToken = jwtUtil.generateToken(Map.of("email", username), refreshTokenExpMin);
-        redisService.setKeyAndValue(accessToken, username, refreshTokenExpMin+1);
+        redisService.setKeyAndValue(refreshToken, username, refreshTokenExpMin+1);
 
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
