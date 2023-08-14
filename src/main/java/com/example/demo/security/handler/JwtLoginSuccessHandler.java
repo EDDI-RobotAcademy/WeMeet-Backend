@@ -4,6 +4,7 @@ import com.example.demo.security.service.RedisService;
 import com.example.demo.security.utils.JwtUtil;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -33,10 +34,14 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
         String refreshToken = jwtUtil.generateToken(Map.of("email", username), refreshTokenExpMin);
         redisService.setKeyAndValue(refreshToken, username, refreshTokenExpMin+1);
 
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
+
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
         Gson gson = new Gson();
-        String jsonStr = gson.toJson(Map.of("accessToken", accessToken, "refreshToken", refreshToken));
+        String jsonStr = gson.toJson(Map.of("accessToken", accessToken));
 
         out.write(jsonStr);
         out.flush();
