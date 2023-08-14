@@ -36,6 +36,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
+        cookie.setPath("/");
         response.addCookie(cookie);
 
         response.setContentType("application/json");
