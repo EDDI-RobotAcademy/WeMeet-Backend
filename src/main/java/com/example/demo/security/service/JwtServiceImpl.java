@@ -2,8 +2,8 @@ package com.example.demo.security.service;
 
 import com.example.demo.security.costomUser.CustomUserDetails;
 import com.example.demo.security.utils.JwtUtil;
-import com.google.gson.Gson;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -12,8 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,8 +24,11 @@ public class JwtServiceImpl implements JwtService{
     final JwtUtil jwtUtil;
     final RedisService redisService;
     @Override
-    public ResponseEntity<Map<String, Object>> refresh() {
-        String email = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+    public ResponseEntity<Map<String, Object>> refresh(String refreshToken) {
+
+        Map<String, Object> values = jwtUtil.validateToken(refreshToken);
+        String email = (String) values.get("email");
+
         Map<String, Object> payload = Map.of("email", email);
         long accessTokenExpMin = 10;
         String accessToken = jwtUtil.generateToken(payload, accessTokenExpMin);
