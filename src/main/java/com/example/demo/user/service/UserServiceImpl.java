@@ -1,9 +1,12 @@
 package com.example.demo.user.service;
 
+import com.example.demo.security.costomUser.CustomUserDetails;
 import com.example.demo.security.service.RedisService;
+import com.example.demo.security.utils.JwtUtil;
 import com.example.demo.user.entity.Role;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.entity.UserRole;
+import com.example.demo.user.form.UserResForm;
 import com.example.demo.user.form.UserSignUpForm;
 import com.example.demo.user.repository.RoleRepository;
 import com.example.demo.user.repository.UserRepository;
@@ -11,9 +14,12 @@ import com.example.demo.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -26,6 +32,7 @@ public class UserServiceImpl implements UserService {
     final private RoleRepository roleRepository;
     final private UserRoleRepository userRoleRepository;
     final private RedisService redisService;
+    final private JwtUtil jwtUtil;
     @Override
     public boolean signUp(UserSignUpForm userSignUpForm) {
         final Optional<User> maybeUser = userRepository.findByEmail(userSignUpForm.getEmail());
@@ -49,5 +56,20 @@ public class UserServiceImpl implements UserService {
         redisService.deleteByKey(refreshToken);
 
         return true;
+    }
+
+    @Override
+    public ResponseEntity getUserInfo() {
+        String email = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        User user = userRepository.findUser(email);
+
+        UserResForm userResForm = UserResForm.builder()
+                .name(user.getName())
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .roleType(user.getUserRole().getRole().getRoleType())
+                .build();
+        return ResponseEntity.ok()
+                .body(userResForm);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.demo.user.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -11,7 +12,7 @@ public class UserRole {
     private Long id;
     @OneToOne(fetch = FetchType.LAZY )
     private User user;
-
+    @Getter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Role role;
 

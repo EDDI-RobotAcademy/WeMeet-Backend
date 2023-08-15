@@ -1,11 +1,13 @@
 package com.example.demo.user.controller;
 
 import com.example.demo.security.costomUser.CustomUserDetails;
+import com.example.demo.user.form.UserResForm;
 import com.example.demo.user.form.UserSignUpForm;
 import com.example.demo.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,9 +27,7 @@ public class UserController {
         return userService.signOut(headers, refreshToken);
     }
     @GetMapping
-    public boolean test() {
-        log.info("test");
-        log.info(((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername());
-        return true;
+    public ResponseEntity getUserInfo() {
+        return userService.getUserInfo();
     }
 }
