@@ -58,7 +58,7 @@ public class SecurityConfig {
 
         return http
                 .authorizeHttpRequests((authorizeRequests) -> {
-                    authorizeRequests.requestMatchers("/user/sign-up", "/jwt/refresh", "/oauth", "/oauth/google-login")
+                    authorizeRequests.requestMatchers("/user/sign-up", "/jwt/refresh", "/oauth", "/oauth/google-login", "oauth/google")
                             .permitAll();
                     authorizeRequests.requestMatchers("/user")
                             .hasAnyRole("NORMAL");
