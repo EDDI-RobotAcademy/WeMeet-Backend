@@ -1,14 +1,18 @@
 package com.example.demo.user.service;
 
+import com.example.demo.security.costomUser.CustomUserDetails;
+import com.example.demo.security.service.RedisService;
 import com.example.demo.user.entity.Role;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.entity.UserRole;
+import com.example.demo.user.form.SignOutReqForm;
 import com.example.demo.user.form.UserSignUpForm;
 import com.example.demo.user.repository.RoleRepository;
 import com.example.demo.user.repository.UserRepository;
 import com.example.demo.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +26,7 @@ public class UserServiceImpl implements UserService {
     final private UserRepository userRepository;
     final private RoleRepository roleRepository;
     final private UserRoleRepository userRoleRepository;
+    final private RedisService redisService;
     @Override
     public boolean signUp(UserSignUpForm userSignUpForm) {
         final Optional<User> maybeUser = userRepository.findByEmail(userSignUpForm.getEmail());
@@ -34,6 +39,17 @@ public class UserServiceImpl implements UserService {
         final Role role = roleRepository.findByRoleType(userSignUpForm.getRoleType()).get();
         final UserRole userRole = new UserRole(user, role);
         userRoleRepository.save(userRole);
+        return true;
+    }
+
+    @Override
+    public boolean signOut(SignOutReqForm reqForm) {
+        String accessToken = reqForm.getAccessToken();
+        String refreshToken = reqForm.getRefreshToken();
+
+        redisService.deleteByKey(accessToken);
+        redisService.deleteByKey(refreshToken);
+
         return true;
     }
 }
