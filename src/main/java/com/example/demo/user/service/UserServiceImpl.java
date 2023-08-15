@@ -1,21 +1,20 @@
 package com.example.demo.user.service;
 
-import com.example.demo.security.costomUser.CustomUserDetails;
 import com.example.demo.security.service.RedisService;
 import com.example.demo.user.entity.Role;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.entity.UserRole;
-import com.example.demo.user.form.SignOutReqForm;
 import com.example.demo.user.form.UserSignUpForm;
 import com.example.demo.user.repository.RoleRepository;
 import com.example.demo.user.repository.UserRepository;
 import com.example.demo.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -43,9 +42,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean signOut(SignOutReqForm reqForm) {
-        String accessToken = reqForm.getAccessToken();
-        String refreshToken = reqForm.getRefreshToken();
+    public boolean signOut(HttpHeaders headers, String refreshToken) {
+        String accessToken = Objects.requireNonNull(headers.get("Authorization")).toString().substring(7);
 
         redisService.deleteByKey(accessToken);
         redisService.deleteByKey(refreshToken);
