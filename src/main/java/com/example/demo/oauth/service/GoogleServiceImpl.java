@@ -1,7 +1,7 @@
 package com.example.demo.oauth.service;
 
 import com.example.demo.oauth.dto.GoogleOAuthToken;
-import com.example.demo.user.dto.UserDto;
+import com.example.demo.security.service.JwtService;
 import com.example.demo.user.entity.Role;
 import com.example.demo.user.entity.RoleType;
 import com.example.demo.user.entity.User;
@@ -13,10 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -34,6 +31,7 @@ public class GoogleServiceImpl implements GoogleService{
     final private UserRepository userRepository;
     final private UserRoleRepository userRoleRepository;
     final private RoleRepository roleRepository;
+    final private JwtService jwtService;
     @Value("${google.googleLoginUrl}")
     private String googleLoginUrl;
     @Value("${google.GOOGLE_TOKEN_REQUEST_URL}")
@@ -53,7 +51,7 @@ public class GoogleServiceImpl implements GoogleService{
         System.out.println(reqUrl);
         return reqUrl;
     }
-    public GoogleOAuthToken getAccessToken(String code) {
+    private GoogleOAuthToken getAccessToken(String code) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
 
@@ -75,7 +73,7 @@ public class GoogleServiceImpl implements GoogleService{
         return response.getBody();
     }
 
-    public ResponseEntity<String> requestUserInfo(GoogleOAuthToken oAuthToken) {
+    private ResponseEntity<String> requestUserInfo(GoogleOAuthToken oAuthToken) {
         //header에 accessToken을 담는다.
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + oAuthToken.getAccess_token());
@@ -87,7 +85,7 @@ public class GoogleServiceImpl implements GoogleService{
         System.out.println("response.getBody() = " + response.getBody());
         return response;
     }
-    public UserDto saveUserInfo(ResponseEntity<String> response){
+    private User saveUserInfo(ResponseEntity<String> response){
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> jsonMap;
         try {
@@ -104,12 +102,26 @@ public class GoogleServiceImpl implements GoogleService{
         final Role role = roleRepository.findByRoleType(roleType).get();
         final UserRole userRole = new UserRole(savedUser, role);
         userRoleRepository.save(userRole);
+        return savedUser;
+    }
+    @Override
+    public ResponseEntity getJwt(String code) {
+        GoogleOAuthToken googleOAuthToken = getAccessToken(code);
+        ResponseEntity<String> response = requestUserInfo(googleOAuthToken);
+        User user = saveUserInfo(response);
 
-        UserDto user = UserDto
-                .builder()
-                .name(savedUser.getName())
+        String accessToken = jwtService.generateAccessToken(user.getEmail());
+        String refreshToken = jwtService.generateRefreshToken(user.getEmail());
+
+        ResponseCookie responseCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
                 .build();
-        return user;
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+                .body(accessToken);
     }
 }
 

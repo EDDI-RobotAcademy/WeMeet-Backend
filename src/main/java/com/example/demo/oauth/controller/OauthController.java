@@ -22,10 +22,8 @@ public class OauthController {
     }
 
     @GetMapping("/google-login")
-    public UserDto googleCallback(@RequestParam String code) {
-        GoogleOAuthToken googleOAuthToken = googleService.getAccessToken(code);
-        ResponseEntity<String> response = googleService.requestUserInfo(googleOAuthToken);
-        return googleService.saveUserInfo(response);
+    public ResponseEntity googleCallback(@RequestParam String code) {
+        return googleService.getJwt(code);
     }
 
 }
