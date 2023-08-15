@@ -19,4 +19,9 @@ public class Role {
     public Role(RoleType roleType) {
         this.roleType = roleType;
     }
+
+    @Override
+    public String toString() {
+        return roleType.name();
+    }
 }
