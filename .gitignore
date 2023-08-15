@@ -38,3 +38,4 @@ out/
 
 redis.properties
 application.properties
+*.properties
