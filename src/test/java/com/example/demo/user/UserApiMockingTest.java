@@ -1,9 +1,12 @@
 package com.example.demo.user;
 
+import com.example.demo.user.entity.Role;
 import com.example.demo.user.entity.RoleType;
-import com.example.demo.user.entity.User;
+import com.example.demo.user.entity.UserRole;
 import com.example.demo.user.form.UserSignUpForm;
-import com.example.demo.user.service.UserService;
+import com.example.demo.user.repository.RoleRepository;
+import com.example.demo.user.repository.UserRepository;
+import com.example.demo.user.repository.UserRoleRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,7 +31,11 @@ public class UserApiMockingTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private UserService mockUserService;
+    private UserRepository mockUserRepository;
+    @MockBean
+    private RoleRepository mockRoleRepository;
+    @MockBean
+    private UserRoleRepository userRoleRepository;
 
     @Test
     @DisplayName("회원가입 api 테스트")
@@ -36,7 +45,9 @@ public class UserApiMockingTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String content = objectMapper.writeValueAsString(userSignUpForm);
 
-        when(mockUserService.signUp(any(UserSignUpForm.class))).thenReturn(true);
+        when(mockUserRepository.findByEmail(userSignUpForm.getEmail())).thenReturn(Optional.empty());
+        when(mockRoleRepository.findByRoleType(userSignUpForm.getRoleType())).thenReturn(Optional.of(new Role(RoleType.NORMAL)));
+        when(userRoleRepository.save(any())).thenReturn(null);
 
         mockMvc.perform(post("/user/sign-up")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -46,6 +57,8 @@ public class UserApiMockingTest {
                 .andExpect(content().string("true"));
 
 
-        verify(mockUserService, times(1)).signUp(any(UserSignUpForm.class));
+        verify(mockUserRepository, times(1)).findByEmail(any(String.class));
+        verify(mockRoleRepository, times(1)).findByRoleType(any(RoleType.class));
+        verify(userRoleRepository, times(1)).save(any(UserRole.class));
     }
 }
