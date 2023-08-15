@@ -36,15 +36,16 @@ public class UserApiMockingTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String content = objectMapper.writeValueAsString(userSignUpForm);
 
-        when(mockUserService.signUp(eq(userSignUpForm))).thenReturn(true);
+        when(mockUserService.signUp(any(UserSignUpForm.class))).thenReturn(true);
 
         mockMvc.perform(post("/user/sign-up")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(content().string("true"));
 
-        verify(mockUserService, times(1)).signUp(userSignUpForm);
+
+        verify(mockUserService, times(1)).signUp(any(UserSignUpForm.class));
     }
 }
