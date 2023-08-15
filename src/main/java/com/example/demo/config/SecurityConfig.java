@@ -38,6 +38,7 @@ public class SecurityConfig {
         filter.setForceEncoding(true);
         http.addFilterBefore(filter, CsrfFilter.class);
 
+        http.cors();
 
         http.csrf(AbstractHttpConfigurer::disable);
 

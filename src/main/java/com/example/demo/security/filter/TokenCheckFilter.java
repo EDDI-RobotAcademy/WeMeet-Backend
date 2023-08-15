@@ -16,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -29,6 +30,7 @@ public class TokenCheckFilter extends OncePerRequestFilter {
 
     private static String getJwtToken(HttpServletRequest request) {
         String headerStr = request.getHeader("Authorization");
+        System.out.println(request.getMethod());
         if(headerStr == null) {
             throw new AccessTokenException(AccessTokenException.TOKEN_ERROR.UNACCEPT);
         }
@@ -57,8 +59,7 @@ public class TokenCheckFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String uri = request.getRequestURI();
-
-        if(jwtUtil.isTokenCheckFilterExcludeUris(uri)) {
+        if(CorsUtils.isPreFlightRequest(request) || jwtUtil.isTokenCheckFilterExcludeUris(uri)) {
             filterChain.doFilter(request, response);
             return ;
         }
