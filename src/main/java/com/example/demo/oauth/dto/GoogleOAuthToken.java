@@ -1,4 +1,4 @@
-package com.example.demo.oauth.entity;
+package com.example.demo.oauth.dto;
 
 import lombok.Data;
 
