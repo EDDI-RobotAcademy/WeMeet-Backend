@@ -1,11 +1,11 @@
 package com.example.demo.user.controller;
 
 import com.example.demo.security.costomUser.CustomUserDetails;
-import com.example.demo.user.form.SignOutReqForm;
 import com.example.demo.user.form.UserSignUpForm;
 import com.example.demo.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +20,9 @@ public class UserController {
         return userService.signUp(userSignUpForm);
     }
     @PostMapping("/sign-out")
-    public boolean userSignout(@RequestBody SignOutReqForm reqForm) {
+    public boolean userSignout(@RequestHeader HttpHeaders headers, @CookieValue("refreshToken") String refreshToken) {
         log.info("signout()");
-        return userService.signOut(reqForm);
+        return userService.signOut(headers, refreshToken);
     }
     @GetMapping
     public boolean test() {
