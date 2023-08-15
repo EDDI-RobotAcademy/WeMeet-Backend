@@ -5,6 +5,7 @@ import com.example.demo.security.filter.JwtLoginFilter;
 import com.example.demo.security.filter.TokenCheckFilter;
 import com.example.demo.security.handler.JwtLoginFailHandler;
 import com.example.demo.security.handler.JwtLoginSuccessHandler;
+import com.example.demo.security.service.JwtService;
 import com.example.demo.security.service.RedisService;
 import com.example.demo.security.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class SecurityConfig {
     final CustomUserDetailsService customUserDetailsService;
     final JwtUtil jwtUtil;
     final RedisService redisService;
+    final JwtService jwtService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -46,7 +48,7 @@ public class SecurityConfig {
 
         JwtLoginFilter jwtLoginFilter = new JwtLoginFilter("/user/sign-in");
         jwtLoginFilter.setAuthenticationManager(authenticationManager);
-        jwtLoginFilter.setAuthenticationSuccessHandler(new JwtLoginSuccessHandler(jwtUtil, redisService));
+        jwtLoginFilter.setAuthenticationSuccessHandler(new JwtLoginSuccessHandler(jwtUtil, redisService, jwtService));
         jwtLoginFilter.setAuthenticationFailureHandler(new JwtLoginFailHandler());
 
         http.addFilterBefore(jwtLoginFilter, UsernamePasswordAuthenticationFilter.class);
@@ -56,7 +58,7 @@ public class SecurityConfig {
 
         return http
                 .authorizeHttpRequests((authorizeRequests) -> {
-                    authorizeRequests.requestMatchers("/user/sign-up", "/jwt/refresh")
+                    authorizeRequests.requestMatchers("/user/sign-up", "/jwt/refresh", "/oauth", "/oauth/google-login")
                             .permitAll();
                     authorizeRequests.requestMatchers("/user")
                             .hasAnyRole("NORMAL");
