@@ -1,19 +1,14 @@
 package com.example.demo.security.service;
 
-import com.example.demo.security.costomUser.CustomUserDetails;
 import com.example.demo.security.utils.JwtUtil;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +18,9 @@ import java.util.Map;
 public class JwtServiceImpl implements JwtService{
     final JwtUtil jwtUtil;
     final RedisService redisService;
+    final long ACCESS_TOKEN_EXP_MIN = 10;
+    final long REFRESH_TOKEN_EXP_MIN = 10;
+
     @Override
     public ResponseEntity<Map<String, Object>> refresh(String refreshToken) {
 
@@ -42,5 +40,17 @@ public class JwtServiceImpl implements JwtService{
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(responseMap);
+    }
+    @Override
+    public String generateAccessToken(String email) {
+        String accessToken = jwtUtil.generateToken(Map.of("email", email), ACCESS_TOKEN_EXP_MIN);
+        redisService.setKeyAndValue(accessToken, email, ACCESS_TOKEN_EXP_MIN+1);
+        return accessToken;
+    }
+    @Override
+    public String generateRefreshToken(String email) {
+        String refreshToken = jwtUtil.generateToken(Map.of("email", email), REFRESH_TOKEN_EXP_MIN);
+        redisService.setKeyAndValue(refreshToken, email, REFRESH_TOKEN_EXP_MIN+1);
+        return refreshToken;
     }
 }

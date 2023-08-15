@@ -7,4 +7,7 @@ import java.util.Map;
 
 public interface JwtService {
     ResponseEntity<Map<String, Object>> refresh(String refreshToken);
+    String generateAccessToken(String email);
+
+    String generateRefreshToken(String email);
 }

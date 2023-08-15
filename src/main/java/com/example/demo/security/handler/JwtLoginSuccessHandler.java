@@ -1,5 +1,6 @@
 package com.example.demo.security.handler;
 
+import com.example.demo.security.service.JwtService;
 import com.example.demo.security.service.RedisService;
 import com.example.demo.security.utils.JwtUtil;
 import com.google.gson.Gson;
@@ -21,18 +22,15 @@ import java.util.Map;
 public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtUtil jwtUtil;
     private final RedisService redisService;
+    private final JwtService jwtService;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         String username = authentication.getName();
         String role = getUserRole(authentication);
 
-        long accessTokenExpMin = 10;
-        String accessToken = jwtUtil.generateToken(Map.of("email", username), accessTokenExpMin);
-        redisService.setKeyAndValue(accessToken, username, accessTokenExpMin+1);
-
-        long refreshTokenExpMin = 60;
-        String refreshToken = jwtUtil.generateToken(Map.of("email", username), refreshTokenExpMin);
-        redisService.setKeyAndValue(refreshToken, username, refreshTokenExpMin+1);
+        String accessToken = jwtService.generateAccessToken(username);
+        String refreshToken = jwtService.generateRefreshToken(username);
 
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
