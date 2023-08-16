@@ -21,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.example.demo.user.entity.RoleType.NORMAL;
 
@@ -94,14 +95,21 @@ public class GoogleServiceImpl implements GoogleService{
             throw new RuntimeException("Failed to parse JSON string", e);
         }
         String email = (String) jsonMap.get("email");
-        String name = (String) jsonMap.get("name");
-        String nickname = (String) jsonMap.get("name");
-        System.out.println(email);
-        User savedUser = userRepository.save(new User(name,nickname,email));
-        final RoleType roleType = NORMAL;
-        final Role role = roleRepository.findByRoleType(roleType).get();
-        final UserRole userRole = new UserRole(savedUser, role);
-        userRoleRepository.save(userRole);
+
+        Optional<User> maybeUser = userRepository.findByEmail(email);
+        User savedUser;
+        if(maybeUser.isEmpty()) {
+            String name = (String) jsonMap.get("name");
+            String nickname = (String) jsonMap.get("name");
+            System.out.println(email);
+            savedUser = userRepository.save(new User(name, nickname, email));
+            final RoleType roleType = NORMAL;
+            final Role role = roleRepository.findByRoleType(roleType).get();
+            final UserRole userRole = new UserRole(savedUser, role);
+            userRoleRepository.save(userRole);
+        } else {
+            savedUser = maybeUser.get();
+        }
         return savedUser;
     }
     @Override
