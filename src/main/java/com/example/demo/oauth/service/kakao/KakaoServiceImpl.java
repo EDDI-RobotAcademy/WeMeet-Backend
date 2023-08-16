@@ -84,16 +84,18 @@ public class KakaoServiceImpl implements KakaoService {
             throw new RuntimeException("Failed to parse JSON string", e);
         }
 
+        // "properties" 키 아래의 중첩된 JSON 객체 파싱
+        Map<String, Object> propertiesMap = (Map<String, Object>) jsonMap.get("properties");
+        String nickname = (String) propertiesMap.get("nickname");
+
         // "kakao_account" 키 아래의 중첩된 JSON 객체 파싱
         Map<String, Object> kakaoAccountMap = (Map<String, Object>) jsonMap.get("kakao_account");
         String email = (String) kakaoAccountMap.get("email");
 
         Optional<User> maybeUser = userRepository.findByEmail(email);
         User savedUser;
-        if(maybeUser.isEmpty()) {
-            String name = (String) jsonMap.get("name");
-            String nickname = (String) jsonMap.get("nickname");
-            System.out.println(email);
+        if (maybeUser.isEmpty()) {
+            String name = nickname; // 닉네임을 이름으로 사용
             savedUser = userRepository.save(new User(name, nickname, email));
             final RoleType roleType = NORMAL;
             final Role role = roleRepository.findByRoleType(roleType).get();
