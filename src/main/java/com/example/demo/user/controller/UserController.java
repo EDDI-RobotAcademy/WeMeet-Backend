@@ -31,12 +31,12 @@ public class UserController {
         return userService.getUserInfo();
     }
 
-    @GetMapping("/check-nickname")
-    public Boolean getNickname(@RequestBody String nickname){
+    @GetMapping("/check-nickname/{nickname}")
+    public Boolean getNickname(@PathVariable("nickname") String nickname){
         return userService.checkNickname(nickname);
     }
     @GetMapping("/check-email/{email}")
-    public Boolean getEmail(@RequestBody String email){
+    public Boolean getEmail(@PathVariable("email")  String email){
         return userService.checkNickname(email);
     }
 }
