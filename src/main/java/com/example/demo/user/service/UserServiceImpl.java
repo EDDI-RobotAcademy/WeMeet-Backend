@@ -61,13 +61,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity getUserInfo() {
         String email = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        User user = userRepository.findUser(email);
+        User user = userRepository.findUser(email).get();
 
         UserResForm userResForm = UserResForm.builder()
                 .name(user.getName())
                 .nickname(user.getNickname())
                 .email(user.getEmail())
-                .roleType(user.getUserRole().getRole().getRoleType())
+                .roleType(user.getRole())
                 .build();
         return ResponseEntity.ok()
                 .body(userResForm);
