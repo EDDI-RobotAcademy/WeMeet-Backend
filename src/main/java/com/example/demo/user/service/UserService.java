@@ -13,4 +13,6 @@ public interface UserService {
     boolean signOut(HttpHeaders headers, String refreshToken);
 
     ResponseEntity getUserInfo();
+    Boolean checkNickname(String nickname);
+    Boolean checkEmail(String email);
 }
