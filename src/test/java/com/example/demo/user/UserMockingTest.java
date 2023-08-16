@@ -1,6 +1,7 @@
 package com.example.demo.user;
 
 import com.example.demo.security.service.RedisService;
+import com.example.demo.security.utils.JwtUtil;
 import com.example.demo.user.entity.Role;
 import com.example.demo.user.entity.RoleType;
 import com.example.demo.user.entity.User;
@@ -36,6 +37,8 @@ public class UserMockingTest {
     private UserRoleRepository mockUserRoleRepository;
     @Mock
     private RedisService mockRedisService;
+    @Mock
+    private JwtUtil jwtUtil;
 
     @InjectMocks
     private UserServiceImpl mockUserService;
@@ -78,7 +81,7 @@ public class UserMockingTest {
 
         // 실제 구동 테스트
         final UserServiceImpl sut = new UserServiceImpl(
-                passwordEncoder, mockUserRepository, mockRoleRepository, mockUserRoleRepository, mockRedisService);
+                passwordEncoder, mockUserRepository, mockRoleRepository, mockUserRoleRepository, mockRedisService, jwtUtil);
         final Boolean actual = sut.signUp(userSignUpForm);
 
         assertTrue(actual);
