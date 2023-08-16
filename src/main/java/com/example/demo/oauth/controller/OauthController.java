@@ -1,8 +1,7 @@
 package com.example.demo.oauth.controller;
 
-import com.example.demo.oauth.service.GoogleService;
-import com.example.demo.oauth.dto.GoogleOAuthToken;
-import com.example.demo.user.dto.UserDto;
+import com.example.demo.oauth.service.google.GoogleService;
+import com.example.demo.oauth.service.kakao.KakaoService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/oauth")
 public class OauthController {
     final private GoogleService googleService;
+    final private KakaoService kakaoService;
 
     @GetMapping("/google")
     public @ResponseBody String getGoogleOAuthUrl(HttpServletRequest request) throws Exception {
@@ -26,4 +26,15 @@ public class OauthController {
         return googleService.getJwt(code);
     }
 
+    @GetMapping("/kakao")
+    public String getKakaoOAuthUrl() {
+        log.info("getKakaoOAuthUrl()");
+        return kakaoService.kakaoLoginAddress();
+    }
+
+    @GetMapping("/kakao-login")
+    public ResponseEntity kakaoCallback(@RequestParam String code) {
+        log.info("kakaoCallback()");
+        return kakaoService.getJwt(code);
+    }
 }
