@@ -1,6 +1,7 @@
 package com.example.demo.security.service;
 
 import com.example.demo.security.exception.AccessTokenException;
+import com.example.demo.security.exception.RefreshTokenException;
 import com.example.demo.security.utils.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -29,7 +30,7 @@ public class JwtServiceImpl implements JwtService{
     public ResponseEntity<Map<String, Object>> refresh(String refreshToken) {
 
         if(refreshToken == null) {
-            throw new AccessTokenException(AccessTokenException.TOKEN_ERROR.UNACCEPT);
+            throw new RefreshTokenException(RefreshTokenException.TOKEN_ERROR.UNACCEPT);
         }
 
         Map<String, Object> values;
@@ -37,11 +38,11 @@ public class JwtServiceImpl implements JwtService{
             values = jwtUtil.validateToken(refreshToken);
 
         } catch (MalformedJwtException malformedJwtException) {
-            throw new AccessTokenException(AccessTokenException.TOKEN_ERROR.MALFORM);
+            throw new RefreshTokenException(RefreshTokenException.TOKEN_ERROR.MALFORM);
         } catch (SignatureException signatureException) {
-            throw new AccessTokenException(AccessTokenException.TOKEN_ERROR.BADSIGN);
+            throw new RefreshTokenException(RefreshTokenException.TOKEN_ERROR.BADSIGN);
         } catch (ExpiredJwtException expiredJwtException) {
-            throw new AccessTokenException(AccessTokenException.TOKEN_ERROR.EXPIRED);
+            throw new RefreshTokenException(RefreshTokenException.TOKEN_ERROR.EXPIRED);
         }
 
         String email = (String) values.get("email");
