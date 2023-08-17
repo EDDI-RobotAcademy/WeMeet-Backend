@@ -37,6 +37,6 @@ public class UserController {
     }
     @GetMapping("/check-email/{email}")
     public Boolean getEmail(@PathVariable("email")  String email){
-        return userService.checkNickname(email);
+        return userService.checkEmail(email);
     }
 }
