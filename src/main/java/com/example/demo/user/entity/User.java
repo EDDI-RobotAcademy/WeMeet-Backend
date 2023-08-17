@@ -35,7 +35,7 @@ public class User {
         this.nickname = nickname;
         this.email = email;
     }
-    public String getRole() {
-        return this.userRole.getRole().getRoleType().name();
+    public RoleType getRole() {
+        return this.userRole.getRole().getRoleType();
     }
 }

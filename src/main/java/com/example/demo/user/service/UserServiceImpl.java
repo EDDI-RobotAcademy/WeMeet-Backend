@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
                 .name(user.getName())
                 .nickname(user.getNickname())
                 .email(user.getEmail())
-                .roleType(user.getUserRole().getRole().getRoleType())
+                .roleType(user.getRole())
                 .build();
         return ResponseEntity.ok()
                 .body(userResForm);

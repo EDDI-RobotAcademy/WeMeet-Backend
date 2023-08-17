@@ -23,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         log.info("loadUserByUsername()");
-        Optional<User> maybeUser = userRepository.findByEmail(email);
+        Optional<User> maybeUser = userRepository.findUser(email);
         if(maybeUser.isEmpty()) {
             throw new UsernameNotFoundException("There are no users matching the email: "+email);
         }
@@ -31,7 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return CustomUserDetails.builder()
                 .username(email)
                 .password(user.getPassword())
-                .authorities(Collections.singleton(new SimpleGrantedAuthority("ROLE_"+user.getUserRole().toString())))
+                .authorities(Collections.singleton(new SimpleGrantedAuthority("ROLE_"+user.getRole().name())))
                 .isEnabled(true)
                 .isCredentialsNonExpired(true)
                 .isAccountNonLocked(true)
