@@ -21,8 +21,8 @@ public class UserController {
     public boolean userSignUp(@RequestBody UserSignUpForm userSignUpForm){
         return userService.signUp(userSignUpForm);
     }
-    @PostMapping("/sign-out")
-    public boolean userSignout(@RequestHeader HttpHeaders headers, @CookieValue("refreshToken") String refreshToken) {
+    @DeleteMapping("/sign-out")
+    public ResponseEntity userSignout(@RequestHeader HttpHeaders headers, @CookieValue("refreshToken") String refreshToken) {
         log.info("signout()");
         return userService.signOut(headers, refreshToken);
     }

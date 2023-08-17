@@ -1,16 +1,13 @@
 package com.example.demo.user.service;
 
-import com.example.demo.user.form.UserResForm;
 import com.example.demo.user.form.UserSignUpForm;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 public interface UserService {
     boolean signUp(UserSignUpForm userSignUpForm);
 
-    boolean signOut(HttpHeaders headers, String refreshToken);
+    ResponseEntity signOut(HttpHeaders headers, String refreshToken);
 
     ResponseEntity getUserInfo();
     Boolean checkNickname(String nickname);
