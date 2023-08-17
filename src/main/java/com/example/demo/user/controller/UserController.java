@@ -30,4 +30,13 @@ public class UserController {
     public ResponseEntity getUserInfo() {
         return userService.getUserInfo();
     }
+
+    @GetMapping("/check-nickname/{nickname}")
+    public Boolean getNickname(@PathVariable("nickname") String nickname){
+        return userService.checkNickname(nickname);
+    }
+    @GetMapping("/check-email/{email}")
+    public Boolean getEmail(@PathVariable("email")  String email){
+        return userService.checkNickname(email);
+    }
 }

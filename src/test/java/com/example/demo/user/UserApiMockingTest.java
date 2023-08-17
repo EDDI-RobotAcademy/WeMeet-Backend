@@ -40,7 +40,7 @@ public class UserApiMockingTest {
     @Test
     @DisplayName("회원가입 api 테스트")
     public void 회원가입_api_테스트() throws Exception {
-        final UserSignUpForm userSignUpForm = new UserSignUpForm("test@test.com", "1234", RoleType.NORMAL);
+        final UserSignUpForm userSignUpForm = new UserSignUpForm("test","oh","test@test.com", "1234", RoleType.NORMAL);
 
         ObjectMapper objectMapper = new ObjectMapper();
         String content = objectMapper.writeValueAsString(userSignUpForm);

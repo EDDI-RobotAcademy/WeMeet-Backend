@@ -1,4 +1,4 @@
-package com.example.demo.oauth.service;
+package com.example.demo.oauth.service.google;
 
 import com.example.demo.oauth.dto.GoogleOAuthToken;
 import com.example.demo.user.entity.User;

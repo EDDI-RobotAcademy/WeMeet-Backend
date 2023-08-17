@@ -72,4 +72,22 @@ public class UserServiceImpl implements UserService {
         return ResponseEntity.ok()
                 .body(userResForm);
     }
+
+    @Override
+    public Boolean checkNickname(String nickname) {
+        final Optional<User> presentNickname = userRepository.findByNickname(nickname);
+        if (presentNickname.isPresent()) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean checkEmail(String email) {
+        final Optional<User> presentEmail = userRepository.findByEmail(email);
+        if (presentEmail.isPresent()) {
+            return true;
+        }
+        return false;
+    }
 }
