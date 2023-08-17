@@ -43,6 +43,8 @@ jobs:
           mkdir -p src/main/resources
           echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.properties
           echo "${{ secrets.REDIS_PROPERTIES }}" > ./src/main/resources/redis.properties
+          echo "${{ secrets.GOOGLE_PROPERTIES }}" > ./src/main/resources/google.properties
+          echo "${{ secrets.KAKAO_PROPERTIES }}" > ./src/main/resources/kakao.properties
         
       - name: Build with Gradle
         run: ./gradlew build -x test
