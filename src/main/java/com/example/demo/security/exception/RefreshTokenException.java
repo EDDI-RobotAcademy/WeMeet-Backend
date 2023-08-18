@@ -8,15 +8,14 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 
-public class AccessTokenException extends RuntimeException{
+public class RefreshTokenException extends RuntimeException{
     TOKEN_ERROR tokenError;
 
     public enum TOKEN_ERROR {
-        UNACCEPT(401, "Token is null or too short: accessToken"),
-        BADTYPE(401, "Token type Bearer"),
-        MALFORM(403, "Malformed Token"),
-        BADSIGN(403, "BadSignatured Token"),
-        EXPIRED(403, "Expired Token: accessToken");
+        UNACCEPT(401, "Token is null or too short: refreshToken"),
+        MALFORM(403, "Malformed Token: refreshToken"),
+        BADSIGN(403, "BadSignatured Token: refreshToken"),
+        EXPIRED(403, "Expired Token: accessToken: refreshToken");
         private final int status;
         private final String msg;
         TOKEN_ERROR(int status, String msg) {
@@ -31,7 +30,7 @@ public class AccessTokenException extends RuntimeException{
         }
     }
 
-    public AccessTokenException(TOKEN_ERROR error) {
+    public RefreshTokenException(TOKEN_ERROR error) {
         super(error.name());
         this.tokenError = error;
     }

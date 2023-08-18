@@ -14,12 +14,12 @@ import com.example.demo.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -49,13 +49,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean signOut(HttpHeaders headers, String refreshToken) {
+    public ResponseEntity signOut(HttpHeaders headers, String refreshToken) {
         String accessToken = Objects.requireNonNull(headers.get("Authorization")).toString().substring(7);
 
         redisService.deleteByKey(accessToken);
         redisService.deleteByKey(refreshToken);
+        ResponseCookie responseCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .maxAge(0)
+                .path("/")
+                .build();
 
-        return true;
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+                .build();
     }
 
     @Override

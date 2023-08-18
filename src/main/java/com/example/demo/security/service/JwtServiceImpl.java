@@ -1,6 +1,11 @@
 package com.example.demo.security.service;
 
+import com.example.demo.security.exception.AccessTokenException;
+import com.example.demo.security.exception.RefreshTokenException;
 import com.example.demo.security.utils.JwtUtil;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +29,22 @@ public class JwtServiceImpl implements JwtService{
     @Override
     public ResponseEntity<Map<String, Object>> refresh(String refreshToken) {
 
-        Map<String, Object> values = jwtUtil.validateToken(refreshToken);
+        if(refreshToken == null) {
+            throw new RefreshTokenException(RefreshTokenException.TOKEN_ERROR.UNACCEPT);
+        }
+
+        Map<String, Object> values;
+        try {
+            values = jwtUtil.validateToken(refreshToken);
+
+        } catch (MalformedJwtException malformedJwtException) {
+            throw new RefreshTokenException(RefreshTokenException.TOKEN_ERROR.MALFORM);
+        } catch (SignatureException signatureException) {
+            throw new RefreshTokenException(RefreshTokenException.TOKEN_ERROR.BADSIGN);
+        } catch (ExpiredJwtException expiredJwtException) {
+            throw new RefreshTokenException(RefreshTokenException.TOKEN_ERROR.EXPIRED);
+        }
+
         String email = (String) values.get("email");
 
         Map<String, Object> payload = Map.of("email", email);
