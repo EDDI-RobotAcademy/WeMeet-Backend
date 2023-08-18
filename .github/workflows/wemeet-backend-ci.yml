@@ -23,9 +23,9 @@ jobs:
           mkdir src/main/resources
           cd src/main/resources
           echo "${{ secrets.DEVELOPMENT_CI_CONFIG }}" >> application.properties
-          # echo "${{ secrets.REDIS_PROPERTIES }}" >> redis.properties
-          # echo "${{ secrets.GOOGLE_PROPERTIES }}" >> google.properties
-          # echo "${{ secrets.KAKAO_PROPERTIES }}" >> kakao.properties
+          echo "${{ secrets.REDIS_PROPERTIES }}" >>redis.properties
+          echo "${{ secrets.GOOGLE_PROPERTIES }}" >> google.properties
+          echo "${{ secrets.KAKAO_PROPERTIES }}" >> kakao.properties
           
       # CI Test에서 사용할 MySQL 설정
       - name: Setup MySQL
