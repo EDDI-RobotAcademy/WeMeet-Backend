@@ -31,6 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return CustomUserDetails.builder()
                 .username(email)
                 .password(user.getPassword())
+                .user(user)
                 .authorities(Collections.singleton(new SimpleGrantedAuthority("ROLE_"+user.getRole().name())))
                 .isEnabled(true)
                 .isCredentialsNonExpired(true)

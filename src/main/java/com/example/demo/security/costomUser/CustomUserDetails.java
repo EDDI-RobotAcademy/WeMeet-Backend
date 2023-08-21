@@ -1,5 +1,6 @@
 package com.example.demo.security.costomUser;
 
+import com.example.demo.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,4 +20,5 @@ public class CustomUserDetails implements UserDetails {
     private boolean isAccountNonLocked;
     private boolean isCredentialsNonExpired;
     private Collection<? extends GrantedAuthority> authorities;
+    private User user;
 }
