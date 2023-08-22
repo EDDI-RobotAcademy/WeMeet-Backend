@@ -62,7 +62,7 @@ public class SecurityConfig {
                     authorizeRequests.requestMatchers("/user/sign-up", "/jwt/refresh", "/oauth", "/oauth/google-login", "oauth/google","/user/check-nickname/**","/user/check-email/**"
                             ,"/oauth/kakao" ,"/oauth/kakao-login")
                             .permitAll();
-                    authorizeRequests.requestMatchers("/user")
+                    authorizeRequests.requestMatchers("/user", "/moim")
                             .hasAnyRole("NORMAL");
                     authorizeRequests.requestMatchers("/jwt/refresh", "/user/sign-out")
                             .authenticated();
