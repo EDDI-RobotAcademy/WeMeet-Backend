@@ -3,7 +3,7 @@ package com.example.demo.user;
 import com.example.demo.user.entity.Role;
 import com.example.demo.user.entity.RoleType;
 import com.example.demo.user.entity.UserRole;
-import com.example.demo.user.form.UserSignUpForm;
+import com.example.demo.user.controller.form.UserSignUpForm;
 import com.example.demo.user.repository.RoleRepository;
 import com.example.demo.user.repository.UserRepository;
 import com.example.demo.user.repository.UserRoleRepository;
