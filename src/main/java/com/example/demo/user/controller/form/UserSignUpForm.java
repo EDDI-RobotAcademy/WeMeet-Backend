@@ -1,4 +1,4 @@
-package com.example.demo.user.form;
+package com.example.demo.user.controller.form;
 
 import com.example.demo.user.entity.RoleType;
 import com.example.demo.user.entity.User;

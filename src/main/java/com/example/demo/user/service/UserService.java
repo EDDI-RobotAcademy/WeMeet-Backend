@@ -1,6 +1,6 @@
 package com.example.demo.user.service;
 
-import com.example.demo.user.form.UserSignUpForm;
+import com.example.demo.user.controller.form.UserSignUpForm;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
