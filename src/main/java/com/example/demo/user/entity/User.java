@@ -1,5 +1,6 @@
 package com.example.demo.user.entity;
 
+import com.example.demo.user.controller.form.UserInfoResForm;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,4 +39,13 @@ public class User {
     public RoleType getRole() {
         return this.userRole.getRole().getRoleType();
     }
+    public UserInfoResForm toInfoResForm() {
+        return UserInfoResForm.builder()
+                .email(email)
+                .id(id)
+                .roleType(this.getRole())
+                .nickname(nickname)
+                .build();
+    }
+
 }

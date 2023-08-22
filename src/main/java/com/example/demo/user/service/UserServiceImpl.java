@@ -6,7 +6,7 @@ import com.example.demo.security.utils.JwtUtil;
 import com.example.demo.user.entity.Role;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.entity.UserRole;
-import com.example.demo.user.controller.form.UserResForm;
+import com.example.demo.user.controller.form.UserInfoResForm;
 import com.example.demo.user.controller.form.UserSignUpForm;
 import com.example.demo.user.repository.RoleRepository;
 import com.example.demo.user.repository.UserRepository;
@@ -69,14 +69,14 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity getUserInfo() {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        UserResForm userResForm = UserResForm.builder()
+        UserInfoResForm userInfoResForm = UserInfoResForm.builder()
                 .name(user.getName())
                 .nickname(user.getNickname())
                 .email(user.getEmail())
                 .roleType(user.getRole())
                 .build();
         return ResponseEntity.ok()
-                .body(userResForm);
+                .body(userInfoResForm);
     }
 
     @Override
