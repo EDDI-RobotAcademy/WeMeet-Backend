@@ -24,4 +24,8 @@ public class MoimController {
     public ResponseEntity<Map<String, Object>> getMoim(@PathVariable Long id) {
         return moimService.requestMoim(id);
     }
+    @PostMapping("/{id}/user")
+    public ResponseEntity<Map<String, Object>> participateInMoim(@PathVariable Long id) {
+        return moimService.participateInMoim(id);
+    }
 }

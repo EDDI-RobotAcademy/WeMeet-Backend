@@ -53,4 +53,24 @@ public class MoimServiceImpl implements MoimService{
                     .body(Map.of("Moim", moimInfoResForm));
         }
     }
+
+    @Override
+    public ResponseEntity<Map<String, Object>> participateInMoim(Long id) {
+        Optional<Moim> savedMoim = moimRepository.findById(id);
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+
+        if (savedMoim.isEmpty()) {
+            return ResponseEntity.status(204)
+                    .body(Map.of("msg", "no contents: Moim id: "+id));
+        }
+        else {
+            Moim moim = savedMoim.get();
+            Participant participant = new Participant(user, moim);
+            moim.getParticipants().add(participant);
+            moimRepository.save(moim);
+            MoimInfoResForm moimInfoResForm = moim.toInfoResForm();
+            return ResponseEntity.ok()
+                    .body(Map.of("Moim", moimInfoResForm));
+        }
+    }
 }
