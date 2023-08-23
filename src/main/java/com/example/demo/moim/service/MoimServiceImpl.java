@@ -67,6 +67,7 @@ public class MoimServiceImpl implements MoimService{
             Moim moim = savedMoim.get();
             Participant participant = new Participant(user, moim);
             moim.getParticipants().add(participant);
+            participantRepository.save(participant);
             moimRepository.save(moim);
             MoimInfoResForm moimInfoResForm = moim.toInfoResForm();
             return ResponseEntity.ok()
