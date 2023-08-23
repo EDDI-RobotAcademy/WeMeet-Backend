@@ -38,7 +38,9 @@ public class MoimServiceImpl implements MoimService{
         return requestMoim(moim.getId());
     }
 
-    private ResponseEntity<Map<String, Object>> requestMoim(Long id) {
+    @Override
+    @Transactional
+    public ResponseEntity<Map<String, Object>> requestMoim(Long id) {
         Optional<Moim> savedMoim = moimRepository.findById(id);
         if (savedMoim.isEmpty()) {
             return ResponseEntity.status(204)

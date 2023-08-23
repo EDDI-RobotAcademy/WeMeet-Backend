@@ -5,10 +5,7 @@ import com.example.demo.moim.service.MoimService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -22,5 +19,9 @@ public class MoimController {
     public ResponseEntity<Map<String, Object>> createMoim(@RequestBody MoimReqForm reqForm) {
         log.info("createMoim()");
         return moimService.createMoim(reqForm);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> getMoim(@PathVariable Long id) {
+        return moimService.requestMoim(id);
     }
 }

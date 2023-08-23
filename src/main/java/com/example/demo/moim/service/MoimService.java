@@ -7,4 +7,5 @@ import java.util.Map;
 
 public interface MoimService {
     ResponseEntity<Map<String, Object>> createMoim(MoimReqForm reqForm);
+    ResponseEntity<Map<String, Object>> requestMoim(Long id);
 }
