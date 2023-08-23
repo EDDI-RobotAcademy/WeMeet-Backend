@@ -2,6 +2,7 @@ package com.example.demo.moim.service;
 
 import com.example.demo.moim.controller.form.MoimReqForm;
 import com.example.demo.moim.controller.form.MoimInfoResForm;
+import com.example.demo.moim.controller.form.MoimResForm;
 import com.example.demo.moim.entity.Moim;
 import com.example.demo.moim.entity.Participant;
 import com.example.demo.moim.repository.MoimRepository;
@@ -11,10 +12,16 @@ import com.example.demo.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -73,5 +80,18 @@ public class MoimServiceImpl implements MoimService{
             return ResponseEntity.ok()
                     .body(Map.of("Moim", moimInfoResForm));
         }
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<Map<String, Object>> getRecentMoimList(Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+        List<Moim> moimList = moimRepository.findRecentPageableMoim(pageable);
+        List<MoimResForm> resFormList = moimList.stream().map(Moim::toResForm).toList();
+
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("MoimList", resFormList);
+        return ResponseEntity.ok()
+                .body(responseMap);
     }
 }

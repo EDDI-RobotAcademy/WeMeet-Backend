@@ -1,12 +1,14 @@
 package com.example.demo.moim.controller;
 
 import com.example.demo.moim.controller.form.MoimReqForm;
+import com.example.demo.moim.controller.form.MoimResForm;
 import com.example.demo.moim.service.MoimService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -27,5 +29,10 @@ public class MoimController {
     @PostMapping("/{id}/user")
     public ResponseEntity<Map<String, Object>> participateInMoim(@PathVariable Long id) {
         return moimService.participateInMoim(id);
+    }
+    @GetMapping(value = "/list", params = {"page", "size"})
+    public ResponseEntity<Map<String, Object>> getRecentMoimList(@RequestParam Integer page, @RequestParam Integer size) {
+        log.info("getRecentMoimList");
+        return moimService.getRecentMoimList(page, size);
     }
 }

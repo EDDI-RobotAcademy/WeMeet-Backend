@@ -2,12 +2,16 @@ package com.example.demo.moim.entity;
 
 import com.example.demo.moim.controller.form.MoimReqForm;
 import com.example.demo.moim.controller.form.MoimInfoResForm;
+import com.example.demo.moim.controller.form.MoimResForm;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,8 +27,12 @@ public class Moim {
     private String title;
     private Integer maxNumOfUsers;
     private Integer minNumOfUsers;
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "moim")
     private List<Participant> participants;
+    @Formula("(select count(1) from participant p where p.moim_id = id)")
+    private Integer currentParticipantsNumber;
+    @CreationTimestamp
+    private LocalDateTime createdDate;
 
     public static Moim toMoim(MoimReqForm reqForm) {
         return Moim.builder()
@@ -41,6 +49,15 @@ public class Moim {
                 .maxNumOfUsers(maxNumOfUsers)
                 .minNumOfUsers(minNumOfUsers)
                 .participants(participants.stream().map((pu)->pu.getUser().toResForm()).toList())
+                .build();
+    }
+    public MoimResForm toResForm() {
+        return MoimResForm.builder()
+                .id(id)
+                .title(title)
+                .maxNumOfUsers(maxNumOfUsers)
+                .minNumOfUsers(minNumOfUsers)
+                .currentParticipantsNumber(currentParticipantsNumber)
                 .build();
     }
 }
