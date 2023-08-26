@@ -70,6 +70,7 @@ public class UserServiceImpl implements UserService {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
         UserInfoResForm userInfoResForm = UserInfoResForm.builder()
+                .id(user.getId())
                 .name(user.getName())
                 .nickname(user.getNickname())
                 .email(user.getEmail())
