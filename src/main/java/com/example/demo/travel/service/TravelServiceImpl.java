@@ -2,6 +2,7 @@ package com.example.demo.travel.service;
 
 import com.example.demo.travel.controller.form.TravelReqForm;
 import com.example.demo.travel.entity.Travel;
+import com.example.demo.travel.entity.TravelOption;
 import com.example.demo.travel.repository.TravelOptionRepository;
 import com.example.demo.travel.repository.TravelRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +20,13 @@ public class TravelServiceImpl implements TravelService{
 
     @Override
     public ResponseEntity<Map<String, Object>> createTravel(TravelReqForm reqForm) {
+
         Travel travel = Travel.builder()
                 .country(reqForm.getCountry())
                 .city(reqForm.getCity())
                 .build();
+        travel.setTravelOptions(reqForm.getAdditionalOptions().stream().map(TravelOption::new).toList());
+
         travelRepository.save(travel);
         Map<String, Object> responseMap = Map.of("travel", travel);
         return ResponseEntity.ok()
