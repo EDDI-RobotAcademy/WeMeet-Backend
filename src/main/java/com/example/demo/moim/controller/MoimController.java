@@ -27,12 +27,17 @@ public class MoimController {
         return moimService.requestMoim(id);
     }
     @PostMapping("/{id}/user")
-    public ResponseEntity<Map<String, Object>> participateInMoim(@PathVariable Long id) {
-        return moimService.participateInMoim(id);
+    public ResponseEntity<Map<String, Object>> JoinMoim(@PathVariable Long id) {
+        return moimService.joinMoim(id);
     }
     @GetMapping(value = "/list", params = {"page", "size"})
     public ResponseEntity<Map<String, Object>> getRecentMoimList(@RequestParam Integer page, @RequestParam Integer size) {
         log.info("getRecentMoimList");
         return moimService.getRecentMoimList(page, size);
+    }
+    @GetMapping("/{id}/joinable")
+    public ResponseEntity<Map<String, Object>> getJoinable(@PathVariable Long id) {
+        log.info("getJoinable()");
+        return moimService.getJoinable(id);
     }
 }

@@ -12,7 +12,6 @@ import com.example.demo.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -62,7 +61,7 @@ public class MoimServiceImpl implements MoimService{
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> participateInMoim(Long id) {
+    public ResponseEntity<Map<String, Object>> joinMoim(Long id) {
         Optional<Moim> savedMoim = moimRepository.findById(id);
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
@@ -91,6 +90,24 @@ public class MoimServiceImpl implements MoimService{
 
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("MoimList", resFormList);
+        return ResponseEntity.ok()
+                .body(responseMap);
+    }
+
+    @Override
+    public ResponseEntity<Map<String, Object>> getJoinable(Long id) {
+        Optional<Moim> maybeMoim = moimRepository.findById(id);
+        if (maybeMoim.isEmpty()) {
+            return ResponseEntity.noContent()
+                    .build();
+        }
+        Moim moim = maybeMoim.get();
+        Map<String, Object> responseMap;
+        if (moim.getCurrentParticipantsNumber() < moim.getMaxNumOfUsers()) {
+            responseMap = Map.of("joinable", true);
+        } else {
+            responseMap = Map.of("joinable", false);
+        }
         return ResponseEntity.ok()
                 .body(responseMap);
     }
