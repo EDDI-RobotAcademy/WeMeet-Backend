@@ -61,7 +61,7 @@ public class MoimServiceImpl implements MoimService{
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> participateInMoim(Long id) {
+    public ResponseEntity<Map<String, Object>> joinMoim(Long id) {
         Optional<Moim> savedMoim = moimRepository.findById(id);
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
