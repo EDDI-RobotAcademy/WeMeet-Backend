@@ -62,10 +62,12 @@ public class SecurityConfig {
                     authorizeRequests.requestMatchers("/user/sign-up", "/jwt/refresh", "/oauth", "/oauth/google-login", "oauth/google","/user/check-nickname/**","/user/check-email/**"
                             ,"/oauth/kakao" ,"/oauth/kakao-login", "/moim/{id}",  "/moim/list", "/moim/{id}/joinable")
                             .permitAll();
-                    authorizeRequests.requestMatchers("/user", "/moim", "/moim/{id}/user")
-                            .hasAnyRole("NORMAL");
+                    authorizeRequests.requestMatchers("/user", "/moim", "/moim/{id}/user", "/travel/country/list", "/travel/city/list", "/travel/options/list")
+                            .hasAnyRole("NORMAL", "ADMIN");
                     authorizeRequests.requestMatchers("/jwt/refresh", "/user/sign-out")
                             .authenticated();
+                    authorizeRequests.requestMatchers("/travel", "/travel/country/list")
+                            .hasAnyRole("ADMIN");
                 })
                 .build();
     }
