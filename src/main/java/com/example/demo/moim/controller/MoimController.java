@@ -35,4 +35,9 @@ public class MoimController {
         log.info("getRecentMoimList");
         return moimService.getRecentMoimList(page, size);
     }
+    @GetMapping("/{id}/joinable")
+    public ResponseEntity<Map<String, Object>> getJoinable(@PathVariable Long id) {
+        log.info("getJoinable()");
+        return moimService.getJoinable(id);
+    }
 }

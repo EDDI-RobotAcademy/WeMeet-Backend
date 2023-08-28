@@ -60,7 +60,7 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests((authorizeRequests) -> {
                     authorizeRequests.requestMatchers("/user/sign-up", "/jwt/refresh", "/oauth", "/oauth/google-login", "oauth/google","/user/check-nickname/**","/user/check-email/**"
-                            ,"/oauth/kakao" ,"/oauth/kakao-login", "/moim/{id}", "/moim/{id}/user", "/moim/list")
+                            ,"/oauth/kakao" ,"/oauth/kakao-login", "/moim/{id}", "/moim/{id}/user", "/moim/list", "/moim/{id}/joinable")
                             .permitAll();
                     authorizeRequests.requestMatchers("/user", "/moim")
                             .hasAnyRole("NORMAL");
