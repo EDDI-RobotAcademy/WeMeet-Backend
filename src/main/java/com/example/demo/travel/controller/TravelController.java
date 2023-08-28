@@ -1,6 +1,7 @@
 package com.example.demo.travel.controller;
 
 import com.example.demo.travel.controller.form.TravelReqForm;
+import com.example.demo.travel.entity.TravelOption;
 import com.example.demo.travel.service.TravelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,4 +23,10 @@ public class TravelController {
     public ResponseEntity<List<String>> getCountries() {
         return travelService.getCountries();
     }
+    @GetMapping(value = "/city/list", params = {"country"})
+    public ResponseEntity<List<String>> getCities(@RequestParam String country) {
+        return travelService.getCities(country);
+    }
+
+
 }

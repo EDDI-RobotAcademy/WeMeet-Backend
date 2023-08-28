@@ -39,4 +39,13 @@ public class TravelServiceImpl implements TravelService{
         return ResponseEntity.ok()
                 .body(responseList);
     }
+
+    @Override
+    public ResponseEntity<List<String>> getCities(String country) {
+        List<String> responseList = travelRepository.findCitiesByCountry(country);
+        return ResponseEntity.ok()
+                .body(responseList);
+    }
+
+
 }

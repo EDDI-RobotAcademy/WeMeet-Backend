@@ -1,12 +1,11 @@
 package com.example.demo.travel.entity;
 
 import com.example.demo.travel.controller.form.TravelOptionReqForm;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
 
 @Entity
+@NoArgsConstructor
 public class TravelOption {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,6 +13,9 @@ public class TravelOption {
 
     private String optionName;
     private Integer optionPrice;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    private Travel travel;
 
     public TravelOption(TravelOptionReqForm reqForm) {
         this.optionName = reqForm.getOptionName();
