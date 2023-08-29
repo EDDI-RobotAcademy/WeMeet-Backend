@@ -1,14 +1,13 @@
 package com.example.demo.travel.service;
 
-import com.example.demo.travel.controller.form.TravelReqForm;
-import com.example.demo.travel.entity.TravelOption;
+import com.example.demo.travel.controller.dto.TravelDto;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Map;
 
 public interface TravelService {
-    ResponseEntity<Map<String, Object>> createTravel(TravelReqForm reqForm);
+    ResponseEntity<TravelDto> createTravel(TravelDto reqForm);
 
     ResponseEntity<List<String>> getCountries();
 

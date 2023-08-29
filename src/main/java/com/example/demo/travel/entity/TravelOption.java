@@ -1,11 +1,13 @@
 package com.example.demo.travel.entity;
 
-import com.example.demo.travel.controller.form.TravelOptionReqForm;
+import com.example.demo.travel.controller.dto.TravelOptionDto;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor
+@Getter
 public class TravelOption {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -13,12 +15,15 @@ public class TravelOption {
 
     private String optionName;
     private Integer optionPrice;
+    private Boolean isDeprecated;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Travel travel;
 
-    public TravelOption(TravelOptionReqForm reqForm) {
+    public TravelOption(TravelOptionDto reqForm, Travel travel) {
         this.optionName = reqForm.getOptionName();
         this.optionPrice = reqForm.getOptionPrice();
+        this.travel = travel;
+        this.isDeprecated = false;
     }
 }

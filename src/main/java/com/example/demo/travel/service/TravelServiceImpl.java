@@ -1,16 +1,19 @@
 package com.example.demo.travel.service;
 
-import com.example.demo.travel.controller.form.TravelReqForm;
+import com.example.demo.travel.controller.dto.TravelDto;
+import com.example.demo.travel.controller.dto.TravelOptionDto;
 import com.example.demo.travel.entity.Travel;
 import com.example.demo.travel.entity.TravelOption;
 import com.example.demo.travel.repository.TravelOptionRepository;
 import com.example.demo.travel.repository.TravelRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,18 +22,48 @@ public class TravelServiceImpl implements TravelService{
     final TravelOptionRepository travelOptionRepository;
 
     @Override
-    public ResponseEntity<Map<String, Object>> createTravel(TravelReqForm reqForm) {
+    @Transactional
+    public ResponseEntity<TravelDto> createTravel(TravelDto reqForm) {
+        Optional<Travel> maybeTravel = travelRepository.findByCity(reqForm.getCity());
+        Travel travel;
+        if(maybeTravel.isEmpty()) {
+            travel = Travel.builder()
+                    .city(reqForm.getCity())
+                    .country(reqForm.getCountry())
+                    .build();
+            List<TravelOptionDto> travelOptionDtoList = reqForm.getAdditionalOptions();
+            List<TravelOption> travelOptionList = travelOptionDtoList.stream().map((tod)->new TravelOption(tod, travel)).toList();
+            travel.setTravelOptions(travelOptionList);
+            travelRepository.save(travel);
+        } else {
+            travel = maybeTravel.get();
+            List<TravelOption> travelOptionList = travel.getTravelOptions();
+            List<Long> oldTravelOptionIds = reqForm.getAdditionalOptions().stream().filter((to)->to.getId()!=null).map(TravelOptionDto::getId).toList();
+            List<TravelOption> newTravelOptions = reqForm.getAdditionalOptions().stream().filter((to)->to.getId()==null).map(tod->new TravelOption(tod, travel)).toList();
+            List<TravelOption> removalTravelOptions = travel.getTravelOptions().stream().filter(to-> !oldTravelOptionIds.contains(to.getId())).toList();
 
-        Travel travel = Travel.builder()
-                .country(reqForm.getCountry())
-                .city(reqForm.getCity())
+            if(!removalTravelOptions.isEmpty()) {
+                travel.getTravelOptions().removeAll(removalTravelOptions);
+//                travelOptionRepository.deleteAll(removalTravelOptions);
+                travelRepository.save(travel);
+            }
+
+            travel.getTravelOptions().addAll(newTravelOptions);
+            travelOptionRepository.saveAll(newTravelOptions);
+            travelRepository.save(travel);
+        }
+        TravelDto travelDto = TravelDto.builder()
+                .id(travel.getId())
+                .city(travel.getCity())
+                .country(travel.getCountry())
+                .additionalOptions(travel.getTravelOptions().stream().map(to->TravelOptionDto.builder()
+                        .optionName(to.getOptionName())
+                        .optionPrice(to.getOptionPrice())
+                        .isDeprecated(to.getIsDeprecated())
+                        .id(to.getId())
+                        .build()).toList())
                 .build();
-        travel.setTravelOptions(reqForm.getAdditionalOptions().stream().map(TravelOption::new).toList());
-
-        travelRepository.save(travel);
-        Map<String, Object> responseMap = Map.of("travel", travel);
-        return ResponseEntity.ok()
-                .body(responseMap);
+        return ResponseEntity.ok(travelDto);
     }
 
     @Override
@@ -46,6 +79,5 @@ public class TravelServiceImpl implements TravelService{
         return ResponseEntity.ok()
                 .body(responseList);
     }
-
 
 }

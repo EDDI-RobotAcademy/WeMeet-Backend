@@ -1,8 +1,7 @@
 package com.example.demo.travel.controller;
 
-import com.example.demo.travel.entity.TravelOption;
+import com.example.demo.travel.controller.dto.TravelOptionDto;
 import com.example.demo.travel.service.TravelOptionService;
-import com.example.demo.travel.service.TravelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,8 +16,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TravelOptionController {
     final TravelOptionService travelOptionService;
-    @GetMapping(value = "/options/list", params = {"country", "city"})
-    public ResponseEntity<List<TravelOption>> getOptions(@RequestParam String country, String city) {
+    @GetMapping(value = "/list", params = {"country", "city"})
+    public ResponseEntity<List<TravelOptionDto>> getOptions(@RequestParam String country, String city) {
         return travelOptionService.getOptions(country, city);
     }
 }

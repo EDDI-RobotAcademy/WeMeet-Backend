@@ -1,10 +1,7 @@
 package com.example.demo.travel.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
@@ -12,6 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
+@Getter
 public class Travel {
 
     @Id
@@ -21,7 +19,7 @@ public class Travel {
     private String country;
     private String city;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "travel", orphanRemoval = true)
     @Setter
     private List<TravelOption> travelOptions;
 }

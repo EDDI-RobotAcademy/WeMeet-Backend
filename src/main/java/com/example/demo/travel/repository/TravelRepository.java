@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TravelRepository extends JpaRepository<Travel, Long> {
     @Query("select distinct t.country from Travel t")
@@ -13,4 +14,7 @@ public interface TravelRepository extends JpaRepository<Travel, Long> {
 
     @Query("select distinct t.city from Travel t where t.country=:country")
     List<String> findCitiesByCountry(String country);
+
+    @Query("select t from Travel t join fetch t.travelOptions where t.city = :city")
+    Optional<Travel> findByCity(String city);
 }
