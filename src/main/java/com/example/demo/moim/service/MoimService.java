@@ -10,7 +10,7 @@ import java.util.Map;
 public interface MoimService {
     ResponseEntity<MoimDto> createMoim(MoimReqForm reqForm);
     ResponseEntity<MoimDto> requestMoim(Long id);
-    ResponseEntity<Map<String, Object>> joinMoim(Long id);
+    ResponseEntity<MoimDto> joinMoim(Long id);
 
     ResponseEntity<List<MoimDto>> getRecentMoimList(Integer page, Integer size);
 

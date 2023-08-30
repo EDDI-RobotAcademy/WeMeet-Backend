@@ -94,13 +94,13 @@ public class MoimServiceImpl implements MoimService{
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> joinMoim(Long id) {
+    public ResponseEntity<MoimDto> joinMoim(Long id) {
         Optional<Moim> savedMoim = moimRepository.findById(id);
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
         if (savedMoim.isEmpty()) {
-            return ResponseEntity.status(204)
-                    .body(Map.of("msg", "no contents: Moim id: "+id));
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .build();
         }
         else {
             Moim moim = savedMoim.get();
@@ -108,9 +108,17 @@ public class MoimServiceImpl implements MoimService{
             moim.getParticipants().add(participant);
             participantRepository.save(participant);
             moimRepository.save(moim);
-            MoimInfoResForm moimInfoResForm = moim.toInfoResForm();
+            MoimDto moimDto = MoimDto.builder()
+                    .title(moim.getTitle())
+                    .content(moim.getContent())
+                    .maxNumOfUsers(moim.getMaxNumOfUsers())
+                    .minNumOfUsers(moim.getMinNumOfUsers())
+                    .id(moim.getId())
+                    .createdDate(moim.getCreatedDate())
+                    .currentParticipantsNumber(moim.getCurrentParticipantsNumber())
+                    .build();
             return ResponseEntity.ok()
-                    .body(Map.of("Moim", moimInfoResForm));
+                    .body(moimDto);
         }
     }
 

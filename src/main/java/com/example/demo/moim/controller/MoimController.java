@@ -27,7 +27,7 @@ public class MoimController {
         return moimService.requestMoim(id);
     }
     @PostMapping("/{id}/user")
-    public ResponseEntity<Map<String, Object>> JoinMoim(@PathVariable Long id) {
+    public ResponseEntity<MoimDto> JoinMoim(@PathVariable Long id) {
         return moimService.joinMoim(id);
     }
     @GetMapping(value = "/list", params = {"page", "size"})
