@@ -1,7 +1,7 @@
 package com.example.demo.moim.controller;
 
+import com.example.demo.moim.controller.form.dto.MoimDto;
 import com.example.demo.moim.controller.form.MoimReqForm;
-import com.example.demo.moim.controller.form.MoimResForm;
 import com.example.demo.moim.service.MoimService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,20 +18,20 @@ import java.util.Map;
 public class MoimController {
     final MoimService moimService;
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createMoim(@RequestBody MoimReqForm reqForm) {
+    public ResponseEntity<MoimDto> createMoim(@RequestBody MoimReqForm reqForm) {
         log.info("createMoim()");
         return moimService.createMoim(reqForm);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getMoim(@PathVariable Long id) {
+    public ResponseEntity<MoimDto> getMoim(@PathVariable Long id) {
         return moimService.requestMoim(id);
     }
     @PostMapping("/{id}/user")
-    public ResponseEntity<Map<String, Object>> JoinMoim(@PathVariable Long id) {
+    public ResponseEntity<MoimDto> JoinMoim(@PathVariable Long id) {
         return moimService.joinMoim(id);
     }
     @GetMapping(value = "/list", params = {"page", "size"})
-    public ResponseEntity<Map<String, Object>> getRecentMoimList(@RequestParam Integer page, @RequestParam Integer size) {
+    public ResponseEntity<List<MoimDto>> getRecentMoimList(@RequestParam Integer page, @RequestParam Integer size) {
         log.info("getRecentMoimList");
         return moimService.getRecentMoimList(page, size);
     }

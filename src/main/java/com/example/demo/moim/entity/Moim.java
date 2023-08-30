@@ -3,11 +3,10 @@ package com.example.demo.moim.entity;
 import com.example.demo.moim.controller.form.MoimReqForm;
 import com.example.demo.moim.controller.form.MoimInfoResForm;
 import com.example.demo.moim.controller.form.MoimResForm;
+import com.example.demo.travel.entity.Travel;
+import com.example.demo.travel.entity.TravelOption;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Formula;
 
@@ -20,11 +19,13 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @Getter
+@Setter
 public class Moim {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
+    private String content;
     private Integer maxNumOfUsers;
     private Integer minNumOfUsers;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "moim")
@@ -34,30 +35,8 @@ public class Moim {
     @CreationTimestamp
     private LocalDateTime createdDate;
 
-    public static Moim toMoim(MoimReqForm reqForm) {
-        return Moim.builder()
-                .title(reqForm.getTitle())
-                .maxNumOfUsers(reqForm.getMaxNumOfUsers())
-                .minNumOfUsers(reqForm.getMinNumOfUsers())
-                .participants(new ArrayList<>())
-                .build();
-    }
-    public MoimInfoResForm toInfoResForm() {
-        return MoimInfoResForm.builder()
-                .id(id)
-                .title(title)
-                .maxNumOfUsers(maxNumOfUsers)
-                .minNumOfUsers(minNumOfUsers)
-                .participants(participants.stream().map((pu)->pu.getUser().toResForm()).toList())
-                .build();
-    }
-    public MoimResForm toResForm() {
-        return MoimResForm.builder()
-                .id(id)
-                .title(title)
-                .maxNumOfUsers(maxNumOfUsers)
-                .minNumOfUsers(minNumOfUsers)
-                .currentParticipantsNumber(currentParticipantsNumber)
-                .build();
-    }
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "moim")
+    private MoimDestination destination;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "moim")
+    private List<MoimOption> options;
 }

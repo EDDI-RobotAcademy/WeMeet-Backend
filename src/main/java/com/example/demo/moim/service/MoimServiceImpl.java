@@ -1,13 +1,18 @@
 package com.example.demo.moim.service;
 
+import com.example.demo.moim.controller.form.dto.MoimDto;
 import com.example.demo.moim.controller.form.MoimReqForm;
 import com.example.demo.moim.controller.form.MoimInfoResForm;
 import com.example.demo.moim.controller.form.MoimResForm;
+import com.example.demo.moim.controller.form.dto.ParticipantDto;
 import com.example.demo.moim.entity.Moim;
+import com.example.demo.moim.entity.MoimDestination;
+import com.example.demo.moim.entity.MoimOption;
 import com.example.demo.moim.entity.Participant;
 import com.example.demo.moim.repository.MoimRepository;
 import com.example.demo.moim.repository.ParticipantRepository;
 import com.example.demo.security.costomUser.CustomUserDetails;
+import com.example.demo.travel.repository.TravelRepository;
 import com.example.demo.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,83 +20,144 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class MoimServiceImpl implements MoimService{
+public class MoimServiceImpl implements MoimService {
     final MoimRepository moimRepository;
     final ParticipantRepository participantRepository;
+    final TravelRepository travelRepository;
+
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> createMoim(MoimReqForm reqForm) {
-        log.info(String.valueOf(reqForm.getTitle()));
+    public ResponseEntity<MoimDto> createMoim(MoimReqForm reqForm) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        Moim moim = Moim.toMoim(reqForm);
-        Participant participant = new Participant(user, moim);
-        moim.getParticipants().add(participant);
+        Moim moim = Moim.builder()
+                .title(reqForm.getBasicInfo().getTitle())
+                .content(reqForm.getBasicInfo().getContent())
+                .maxNumOfUsers(reqForm.getParticipantsInfo().getMaxParticipants())
+                .minNumOfUsers(reqForm.getParticipantsInfo().getMinParticipants())
+                .participants(new ArrayList<>())
+                .build();
+
+        moim.setDestination(MoimDestination.builder()
+                .country(reqForm.getDestinationInfo().getCountry())
+                .city(reqForm.getDestinationInfo().getCity())
+                .moim(moim)
+                .build());
+
+        moim.setOptions(reqForm.getOptionsInfo().stream()
+                .map((oi) -> MoimOption.builder()
+                        .optionName(oi.getOptionName())
+                        .optionPrice(oi.getOptionPrice())
+                        .moim(moim)
+                        .build())
+                .toList());
+        moim.getParticipants().add(new Participant(user, moim));
         moimRepository.save(moim);
 
-        return requestMoim(moim.getId());
+        MoimDto moimDto = MoimDto.builder()
+                .id(moim.getId())
+                .content(moim.getContent())
+                .maxNumOfUsers(moim.getMaxNumOfUsers())
+                .minNumOfUsers(moim.getMinNumOfUsers())
+                .createdDate(moim.getCreatedDate())
+                .currentParticipantsNumber(moim.getCurrentParticipantsNumber())
+                .participants(List.of(ParticipantDto.builder()
+                        .id(user.getId())
+                        .name(user.getName())
+                        .nickname(user.getNickname())
+                        .email(user.getEmail())
+                        .build()))
+                .build();
+        return ResponseEntity.ok(moimDto);
     }
 
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> requestMoim(Long id) {
+    public ResponseEntity<MoimDto> requestMoim(Long id) {
         Optional<Moim> savedMoim = moimRepository.findById(id);
         if (savedMoim.isEmpty()) {
-            return ResponseEntity.status(204)
-                    .body(Map.of("msg", "no contents: Moim id: "+id));
-        }
-        else {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .build();
+
+        } else {
             Moim moim = savedMoim.get();
-            MoimInfoResForm moimInfoResForm = moim.toInfoResForm();
-            return ResponseEntity.ok()
-                    .body(Map.of("Moim", moimInfoResForm));
+            MoimDto moimDto = MoimDto.builder()
+                    .id(moim.getId())
+                    .content(moim.getContent())
+                    .maxNumOfUsers(moim.getMaxNumOfUsers())
+                    .minNumOfUsers(moim.getMinNumOfUsers())
+                    .createdDate(moim.getCreatedDate())
+                    .currentParticipantsNumber(moim.getCurrentParticipantsNumber())
+                    .participants(
+                            participantRepository.findAllByMoim(moim).stream()
+                                    .map((p) -> ParticipantDto.builder()
+                                            .id(p.getUser().getId())
+                                            .nickname(p.getUser().getNickname())
+                                            .build())
+                                    .toList()
+                    )
+                    .build();
+            return ResponseEntity.ok(moimDto);
         }
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> joinMoim(Long id) {
+    public ResponseEntity<MoimDto> joinMoim(Long id) {
         Optional<Moim> savedMoim = moimRepository.findById(id);
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
         if (savedMoim.isEmpty()) {
-            return ResponseEntity.status(204)
-                    .body(Map.of("msg", "no contents: Moim id: "+id));
-        }
-        else {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .build();
+        } else {
             Moim moim = savedMoim.get();
             Participant participant = new Participant(user, moim);
             moim.getParticipants().add(participant);
             participantRepository.save(participant);
             moimRepository.save(moim);
-            MoimInfoResForm moimInfoResForm = moim.toInfoResForm();
+            MoimDto moimDto = MoimDto.builder()
+                    .title(moim.getTitle())
+                    .content(moim.getContent())
+                    .maxNumOfUsers(moim.getMaxNumOfUsers())
+                    .minNumOfUsers(moim.getMinNumOfUsers())
+                    .id(moim.getId())
+                    .createdDate(moim.getCreatedDate())
+                    .currentParticipantsNumber(moim.getCurrentParticipantsNumber())
+                    .build();
             return ResponseEntity.ok()
-                    .body(Map.of("Moim", moimInfoResForm));
+                    .body(moimDto);
         }
     }
 
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> getRecentMoimList(Integer page, Integer size) {
+    public ResponseEntity<List<MoimDto>> getRecentMoimList(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
         List<Moim> moimList = moimRepository.findRecentPageableMoim(pageable);
-        List<MoimResForm> resFormList = moimList.stream().map(Moim::toResForm).toList();
+        List<MoimDto> responseList = moimList.stream()
+                .map((m) ->
+                        MoimDto.builder()
+                                .id(m.getId())
+                                .title(m.getTitle())
+                                .content(m.getContent())
+                                .minNumOfUsers(m.getMinNumOfUsers())
+                                .maxNumOfUsers(m.getMaxNumOfUsers())
+                                .currentParticipantsNumber(m.getCurrentParticipantsNumber())
+                                .createdDate(m.getCreatedDate())
+                                .build()
+                ).toList();
 
-        Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("MoimList", resFormList);
-        return ResponseEntity.ok()
-                .body(responseMap);
+        return ResponseEntity.ok(responseList);
     }
 
     @Override
