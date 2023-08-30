@@ -22,7 +22,7 @@ public class MoimController {
         return moimService.createMoim(reqForm);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getMoim(@PathVariable Long id) {
+    public ResponseEntity<MoimDto> getMoim(@PathVariable Long id) {
         return moimService.requestMoim(id);
     }
     @PostMapping("/{id}/user")

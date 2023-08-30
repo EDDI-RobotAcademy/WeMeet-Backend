@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,7 @@ public class MoimServiceImpl implements MoimService{
                 .maxNumOfUsers(moim.getMaxNumOfUsers())
                 .minNumOfUsers(moim.getMinNumOfUsers())
                 .createdDate(moim.getCreatedDate())
+                .currentParticipantsNumber(moim.getCurrentParticipantsNumber())
                 .participants(List.of(ParticipantDto.builder()
                                 .id(user.getId())
                                 .name(user.getName())
@@ -62,17 +64,32 @@ public class MoimServiceImpl implements MoimService{
 
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> requestMoim(Long id) {
+    public ResponseEntity<MoimDto> requestMoim(Long id) {
         Optional<Moim> savedMoim = moimRepository.findById(id);
         if (savedMoim.isEmpty()) {
-            return ResponseEntity.status(204)
-                    .body(Map.of("msg", "no contents: Moim id: "+id));
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .build();
+
         }
         else {
             Moim moim = savedMoim.get();
-            MoimInfoResForm moimInfoResForm = moim.toInfoResForm();
-            return ResponseEntity.ok()
-                    .body(Map.of("Moim", moimInfoResForm));
+            MoimDto moimDto = MoimDto.builder()
+                    .id(moim.getId())
+                    .content(moim.getContent())
+                    .maxNumOfUsers(moim.getMaxNumOfUsers())
+                    .minNumOfUsers(moim.getMinNumOfUsers())
+                    .createdDate(moim.getCreatedDate())
+                    .currentParticipantsNumber(moim.getCurrentParticipantsNumber())
+                    .participants(
+                            participantRepository.findAllByMoim(moim).stream()
+                                    .map((p)->ParticipantDto.builder()
+                                            .id(p.getUser().getId())
+                                            .nickname(p.getUser().getNickname())
+                                            .build())
+                                    .toList()
+                    )
+                    .build();
+            return ResponseEntity.ok(moimDto);
         }
     }
 

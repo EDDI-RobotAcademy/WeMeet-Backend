@@ -8,7 +8,7 @@ import java.util.Map;
 
 public interface MoimService {
     ResponseEntity<MoimDto> createMoim(MoimReqForm reqForm);
-    ResponseEntity<Map<String, Object>> requestMoim(Long id);
+    ResponseEntity<MoimDto> requestMoim(Long id);
     ResponseEntity<Map<String, Object>> joinMoim(Long id);
 
     ResponseEntity<Map<String, Object>> getRecentMoimList(Integer page, Integer size);
