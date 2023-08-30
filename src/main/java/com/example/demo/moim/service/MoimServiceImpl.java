@@ -6,10 +6,13 @@ import com.example.demo.moim.controller.form.MoimInfoResForm;
 import com.example.demo.moim.controller.form.MoimResForm;
 import com.example.demo.moim.controller.form.dto.ParticipantDto;
 import com.example.demo.moim.entity.Moim;
+import com.example.demo.moim.entity.MoimDestination;
+import com.example.demo.moim.entity.MoimOption;
 import com.example.demo.moim.entity.Participant;
 import com.example.demo.moim.repository.MoimRepository;
 import com.example.demo.moim.repository.ParticipantRepository;
 import com.example.demo.security.costomUser.CustomUserDetails;
+import com.example.demo.travel.repository.TravelRepository;
 import com.example.demo.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,9 +30,11 @@ import java.util.*;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class MoimServiceImpl implements MoimService{
+public class MoimServiceImpl implements MoimService {
     final MoimRepository moimRepository;
     final ParticipantRepository participantRepository;
+    final TravelRepository travelRepository;
+
     @Override
     @Transactional
     public ResponseEntity<MoimDto> createMoim(MoimReqForm reqForm) {
@@ -42,6 +47,20 @@ public class MoimServiceImpl implements MoimService{
                 .minNumOfUsers(reqForm.getParticipantsInfo().getMinParticipants())
                 .participants(new ArrayList<>())
                 .build();
+
+        moim.setDestination(MoimDestination.builder()
+                .country(reqForm.getDestinationInfo().getCountry())
+                .city(reqForm.getDestinationInfo().getCity())
+                .moim(moim)
+                .build());
+
+        moim.setOptions(reqForm.getOptionsInfo().stream()
+                .map((oi) -> MoimOption.builder()
+                        .optionName(oi.getOptionName())
+                        .optionPrice(oi.getOptionPrice())
+                        .moim(moim)
+                        .build())
+                .toList());
         moim.getParticipants().add(new Participant(user, moim));
         moimRepository.save(moim);
 
@@ -53,10 +72,10 @@ public class MoimServiceImpl implements MoimService{
                 .createdDate(moim.getCreatedDate())
                 .currentParticipantsNumber(moim.getCurrentParticipantsNumber())
                 .participants(List.of(ParticipantDto.builder()
-                                .id(user.getId())
-                                .name(user.getName())
-                                .nickname(user.getNickname())
-                                .email(user.getEmail())
+                        .id(user.getId())
+                        .name(user.getName())
+                        .nickname(user.getNickname())
+                        .email(user.getEmail())
                         .build()))
                 .build();
         return ResponseEntity.ok(moimDto);
@@ -70,8 +89,7 @@ public class MoimServiceImpl implements MoimService{
             return ResponseEntity.status(HttpStatus.NO_CONTENT)
                     .build();
 
-        }
-        else {
+        } else {
             Moim moim = savedMoim.get();
             MoimDto moimDto = MoimDto.builder()
                     .id(moim.getId())
@@ -82,7 +100,7 @@ public class MoimServiceImpl implements MoimService{
                     .currentParticipantsNumber(moim.getCurrentParticipantsNumber())
                     .participants(
                             participantRepository.findAllByMoim(moim).stream()
-                                    .map((p)->ParticipantDto.builder()
+                                    .map((p) -> ParticipantDto.builder()
                                             .id(p.getUser().getId())
                                             .nickname(p.getUser().getNickname())
                                             .build())
@@ -101,8 +119,7 @@ public class MoimServiceImpl implements MoimService{
         if (savedMoim.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT)
                     .build();
-        }
-        else {
+        } else {
             Moim moim = savedMoim.get();
             Participant participant = new Participant(user, moim);
             moim.getParticipants().add(participant);
@@ -128,16 +145,16 @@ public class MoimServiceImpl implements MoimService{
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
         List<Moim> moimList = moimRepository.findRecentPageableMoim(pageable);
         List<MoimDto> responseList = moimList.stream()
-                .map((m)->
-                    MoimDto.builder()
-                            .id(m.getId())
-                            .title(m.getTitle())
-                            .content(m.getContent())
-                            .minNumOfUsers(m.getMinNumOfUsers())
-                            .maxNumOfUsers(m.getMaxNumOfUsers())
-                            .currentParticipantsNumber(m.getCurrentParticipantsNumber())
-                            .createdDate(m.getCreatedDate())
-                            .build()
+                .map((m) ->
+                        MoimDto.builder()
+                                .id(m.getId())
+                                .title(m.getTitle())
+                                .content(m.getContent())
+                                .minNumOfUsers(m.getMinNumOfUsers())
+                                .maxNumOfUsers(m.getMaxNumOfUsers())
+                                .currentParticipantsNumber(m.getCurrentParticipantsNumber())
+                                .createdDate(m.getCreatedDate())
+                                .build()
                 ).toList();
 
         return ResponseEntity.ok(responseList);
