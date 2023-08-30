@@ -1,9 +1,9 @@
 package com.example.demo.moim.service;
 
+import com.example.demo.moim.controller.form.dto.MoimDestinationDto;
 import com.example.demo.moim.controller.form.dto.MoimDto;
 import com.example.demo.moim.controller.form.MoimReqForm;
-import com.example.demo.moim.controller.form.MoimInfoResForm;
-import com.example.demo.moim.controller.form.MoimResForm;
+import com.example.demo.moim.controller.form.dto.MoimOptionDto;
 import com.example.demo.moim.controller.form.dto.ParticipantDto;
 import com.example.demo.moim.entity.Moim;
 import com.example.demo.moim.entity.MoimDestination;
@@ -106,6 +106,18 @@ public class MoimServiceImpl implements MoimService {
                                             .build())
                                     .toList()
                     )
+                    .destination(MoimDestinationDto.builder()
+                            .id(moim.getDestination().getId())
+                            .city(moim.getDestination().getCity())
+                            .country(moim.getDestination().getCountry())
+                            .build())
+                    .options(moim.getOptions().stream()
+                            .map((o)-> MoimOptionDto.builder()
+                                    .id(o.getId())
+                                    .optionName(o.getOptionName())
+                                    .optionPrice(o.getOptionPrice())
+                                    .build())
+                            .toList())
                     .build();
             return ResponseEntity.ok(moimDto);
         }

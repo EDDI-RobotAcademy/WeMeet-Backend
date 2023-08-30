@@ -1,10 +1,5 @@
 package com.example.demo.moim.entity;
 
-import com.example.demo.moim.controller.form.MoimReqForm;
-import com.example.demo.moim.controller.form.MoimInfoResForm;
-import com.example.demo.moim.controller.form.MoimResForm;
-import com.example.demo.travel.entity.Travel;
-import com.example.demo.travel.entity.TravelOption;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
