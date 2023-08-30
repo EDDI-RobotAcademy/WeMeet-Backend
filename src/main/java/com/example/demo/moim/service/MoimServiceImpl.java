@@ -1,8 +1,10 @@
 package com.example.demo.moim.service;
 
+import com.example.demo.moim.controller.form.dto.MoimDto;
 import com.example.demo.moim.controller.form.MoimReqForm;
 import com.example.demo.moim.controller.form.MoimInfoResForm;
 import com.example.demo.moim.controller.form.MoimResForm;
+import com.example.demo.moim.controller.form.dto.ParticipantDto;
 import com.example.demo.moim.entity.Moim;
 import com.example.demo.moim.entity.Participant;
 import com.example.demo.moim.repository.MoimRepository;
@@ -19,10 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -32,16 +31,33 @@ public class MoimServiceImpl implements MoimService{
     final ParticipantRepository participantRepository;
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> createMoim(MoimReqForm reqForm) {
-        log.info(String.valueOf(reqForm.getTitle()));
+    public ResponseEntity<MoimDto> createMoim(MoimReqForm reqForm) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        Moim moim = Moim.toMoim(reqForm);
-        Participant participant = new Participant(user, moim);
-        moim.getParticipants().add(participant);
+        Moim moim = Moim.builder()
+                .title(reqForm.getBasicInfo().getTitle())
+                .content(reqForm.getBasicInfo().getContent())
+                .maxNumOfUsers(reqForm.getParticipantsInfo().getMaxParticipants())
+                .minNumOfUsers(reqForm.getParticipantsInfo().getMinParticipants())
+                .participants(new ArrayList<>())
+                .build();
+        moim.getParticipants().add(new Participant(user, moim));
         moimRepository.save(moim);
 
-        return requestMoim(moim.getId());
+        MoimDto moimDto = MoimDto.builder()
+                .id(moim.getId())
+                .content(moim.getContent())
+                .maxNumOfUsers(moim.getMaxNumOfUsers())
+                .minNumOfUsers(moim.getMinNumOfUsers())
+                .createdDate(moim.getCreatedDate())
+                .participants(List.of(ParticipantDto.builder()
+                                .id(user.getId())
+                                .name(user.getName())
+                                .nickname(user.getNickname())
+                                .email(user.getEmail())
+                        .build()))
+                .build();
+        return ResponseEntity.ok(moimDto);
     }
 
     @Override

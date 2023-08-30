@@ -25,6 +25,7 @@ public class Moim {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
+    private String content;
     private Integer maxNumOfUsers;
     private Integer minNumOfUsers;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "moim")
@@ -34,14 +35,6 @@ public class Moim {
     @CreationTimestamp
     private LocalDateTime createdDate;
 
-    public static Moim toMoim(MoimReqForm reqForm) {
-        return Moim.builder()
-                .title(reqForm.getTitle())
-                .maxNumOfUsers(reqForm.getMaxNumOfUsers())
-                .minNumOfUsers(reqForm.getMinNumOfUsers())
-                .participants(new ArrayList<>())
-                .build();
-    }
     public MoimInfoResForm toInfoResForm() {
         return MoimInfoResForm.builder()
                 .id(id)

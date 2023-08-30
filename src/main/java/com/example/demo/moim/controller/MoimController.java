@@ -1,14 +1,13 @@
 package com.example.demo.moim.controller;
 
+import com.example.demo.moim.controller.form.dto.MoimDto;
 import com.example.demo.moim.controller.form.MoimReqForm;
-import com.example.demo.moim.controller.form.MoimResForm;
 import com.example.demo.moim.service.MoimService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,7 +17,7 @@ import java.util.Map;
 public class MoimController {
     final MoimService moimService;
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createMoim(@RequestBody MoimReqForm reqForm) {
+    public ResponseEntity<MoimDto> createMoim(@RequestBody MoimReqForm reqForm) {
         log.info("createMoim()");
         return moimService.createMoim(reqForm);
     }
