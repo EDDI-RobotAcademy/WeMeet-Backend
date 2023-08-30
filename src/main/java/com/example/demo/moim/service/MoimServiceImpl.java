@@ -116,15 +116,23 @@ public class MoimServiceImpl implements MoimService{
 
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> getRecentMoimList(Integer page, Integer size) {
+    public ResponseEntity<List<MoimDto>> getRecentMoimList(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
         List<Moim> moimList = moimRepository.findRecentPageableMoim(pageable);
-        List<MoimResForm> resFormList = moimList.stream().map(Moim::toResForm).toList();
+        List<MoimDto> responseList = moimList.stream()
+                .map((m)->
+                    MoimDto.builder()
+                            .id(m.getId())
+                            .title(m.getTitle())
+                            .content(m.getContent())
+                            .minNumOfUsers(m.getMinNumOfUsers())
+                            .maxNumOfUsers(m.getMaxNumOfUsers())
+                            .currentParticipantsNumber(m.getCurrentParticipantsNumber())
+                            .createdDate(m.getCreatedDate())
+                            .build()
+                ).toList();
 
-        Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("MoimList", resFormList);
-        return ResponseEntity.ok()
-                .body(responseMap);
+        return ResponseEntity.ok(responseList);
     }
 
     @Override

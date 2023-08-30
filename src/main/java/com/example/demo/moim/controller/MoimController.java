@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,7 +31,7 @@ public class MoimController {
         return moimService.joinMoim(id);
     }
     @GetMapping(value = "/list", params = {"page", "size"})
-    public ResponseEntity<Map<String, Object>> getRecentMoimList(@RequestParam Integer page, @RequestParam Integer size) {
+    public ResponseEntity<List<MoimDto>> getRecentMoimList(@RequestParam Integer page, @RequestParam Integer size) {
         log.info("getRecentMoimList");
         return moimService.getRecentMoimList(page, size);
     }

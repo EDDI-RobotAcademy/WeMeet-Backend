@@ -4,6 +4,7 @@ import com.example.demo.moim.controller.form.dto.MoimDto;
 import com.example.demo.moim.controller.form.MoimReqForm;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
 import java.util.Map;
 
 public interface MoimService {
@@ -11,7 +12,7 @@ public interface MoimService {
     ResponseEntity<MoimDto> requestMoim(Long id);
     ResponseEntity<Map<String, Object>> joinMoim(Long id);
 
-    ResponseEntity<Map<String, Object>> getRecentMoimList(Integer page, Integer size);
+    ResponseEntity<List<MoimDto>> getRecentMoimList(Integer page, Integer size);
 
     ResponseEntity<Map<String, Object>> getJoinable(Long id);
 }
