@@ -6,7 +6,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Formula;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -29,6 +28,8 @@ public class Moim {
     private Integer currentParticipantsNumber;
     @CreationTimestamp
     private LocalDateTime createdDate;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    private State state;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "moim")
     private MoimDestination destination;

@@ -5,10 +5,7 @@ import com.example.demo.moim.controller.form.dto.MoimDto;
 import com.example.demo.moim.controller.form.MoimReqForm;
 import com.example.demo.moim.controller.form.dto.MoimOptionDto;
 import com.example.demo.moim.controller.form.dto.ParticipantDto;
-import com.example.demo.moim.entity.Moim;
-import com.example.demo.moim.entity.MoimDestination;
-import com.example.demo.moim.entity.MoimOption;
-import com.example.demo.moim.entity.Participant;
+import com.example.demo.moim.entity.*;
 import com.example.demo.moim.repository.MoimRepository;
 import com.example.demo.moim.repository.ParticipantRepository;
 import com.example.demo.security.costomUser.CustomUserDetails;
@@ -62,6 +59,17 @@ public class MoimServiceImpl implements MoimService {
                         .build())
                 .toList());
         moim.getParticipants().add(new Participant(user, moim));
+
+        moim.setState(State.builder()
+                        .runwayStartDate(reqForm.getStateInfo().getRunwayStartDate())
+                        .takeoffStartDate(reqForm.getStateInfo().getTakeoffStartDate())
+                        .startDate(reqForm.getStateInfo().getStartDate())
+                        .departureDate(reqForm.getStateInfo().getDepartureDate())
+                        .taxxingPeriod(reqForm.getStateInfo().getTaxxingPeriod())
+                        .runwayPeriod(reqForm.getStateInfo().getRunwayPeriod())
+                        .takeoffPeriod(reqForm.getStateInfo().getTakeoffPeriod())
+                        .state(StateType.TAXXING)
+                .build());
         moimRepository.save(moim);
 
         MoimDto moimDto = MoimDto.builder()
