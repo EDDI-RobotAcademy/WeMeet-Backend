@@ -1,9 +1,11 @@
 package com.example.demo.moim.entity;
 
+import com.example.demo.payment.entity.Payment;
 import com.example.demo.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @NoArgsConstructor
@@ -16,6 +18,9 @@ public class Participant {
     private Moim moim;
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @Setter
+    private Payment payment;
 
     public Participant(User user, Moim moim) {
         this.user = user;

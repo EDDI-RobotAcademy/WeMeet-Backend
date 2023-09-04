@@ -8,6 +8,7 @@ import com.example.demo.moim.controller.form.dto.ParticipantDto;
 import com.example.demo.moim.entity.*;
 import com.example.demo.moim.repository.MoimRepository;
 import com.example.demo.moim.repository.ParticipantRepository;
+import com.example.demo.payment.entity.Payment;
 import com.example.demo.security.costomUser.CustomUserDetails;
 import com.example.demo.travel.repository.TravelRepository;
 import com.example.demo.user.entity.User;
@@ -58,7 +59,12 @@ public class MoimServiceImpl implements MoimService {
                         .moim(moim)
                         .build())
                 .toList());
-        moim.getParticipants().add(new Participant(user, moim));
+        Participant participant = new Participant(user, moim);
+        participant.setPayment(Payment.builder()
+                        .totalPrice(reqForm.getPaymentInfo().getTotalPrice())
+                        .participant(participant)
+                .build());
+        moim.getParticipants().add(participant);
 
         moim.setState(State.builder()
                         .runwayStartDate(reqForm.getStateInfo().getRunwayStartDate())

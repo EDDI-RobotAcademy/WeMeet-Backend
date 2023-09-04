@@ -12,4 +12,5 @@ public class MoimReqForm {
     private ParticipantsInfo participantsInfo;
     private List<OptionInfo> optionsInfo;
     private stateInfo stateInfo;
+    private PaymentInfo paymentInfo;
 }
