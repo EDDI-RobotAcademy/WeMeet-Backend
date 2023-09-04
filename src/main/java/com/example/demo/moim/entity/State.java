@@ -23,6 +23,7 @@ public class State {
     private LocalDateTime runwayStartDate;
     private LocalDateTime takeoffStartDate;
     private LocalDateTime departureDate;
+    private LocalDateTime returnDate;
     private Integer taxxingPeriod;
     private Integer runwayPeriod;
     private Integer takeoffPeriod;

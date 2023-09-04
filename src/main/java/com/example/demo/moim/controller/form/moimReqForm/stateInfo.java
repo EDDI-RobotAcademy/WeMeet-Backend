@@ -14,6 +14,7 @@ public class stateInfo {
     private LocalDateTime runwayStartDate;
     private LocalDateTime takeoffStartDate;
     private LocalDateTime departureDate;
+    private LocalDateTime returnDate;
     private Integer taxxingPeriod;
     private Integer runwayPeriod;
     private Integer takeoffPeriod;
