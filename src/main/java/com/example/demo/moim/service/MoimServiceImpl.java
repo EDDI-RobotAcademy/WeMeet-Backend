@@ -76,6 +76,7 @@ public class MoimServiceImpl implements MoimService {
                         .takeoffPeriod(reqForm.getStateInfo().getTakeoffPeriod())
                         .returnDate(reqForm.getStateInfo().getReturnDate())
                         .state(StateType.TAXXING)
+                        .moim(moim)
                 .build());
         moimRepository.save(moim);
 

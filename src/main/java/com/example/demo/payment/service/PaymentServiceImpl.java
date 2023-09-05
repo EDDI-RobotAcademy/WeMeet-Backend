@@ -1,5 +1,6 @@
 package com.example.demo.payment.service;
 
+import com.example.demo.moim.controller.form.MoimResForm;
 import com.example.demo.moim.entity.Moim;
 import com.example.demo.moim.entity.Participant;
 import com.example.demo.moim.repository.MoimRepository;
@@ -81,6 +82,7 @@ public class PaymentServiceImpl implements PaymentService {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
         Participant participant = participantRepository.findByUserAndMoimId(user, moimId);
+        Moim moim = moimRepository.findById(moimId).get();
         Payment payment = Payment.builder()
                 .participant(participant)
                 .customerUid(reqForm.getCustomerUid())
@@ -88,7 +90,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .payMethod(reqForm.getPayMethod())
                 .installment(new ArrayList<>())
                 .totalPrice(reqForm.getTotalPrice())
-                .numInstallments(participant.getMoim().getState().getRunwayPeriod())
+                .numInstallments(moim.getState().getRunwayPeriod())
                 .build();
 
         Installment firstInstallment = Installment.builder()

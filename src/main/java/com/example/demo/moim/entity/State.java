@@ -27,5 +27,6 @@ public class State {
     private Integer taxxingPeriod;
     private Integer runwayPeriod;
     private Integer takeoffPeriod;
-
+    @OneToOne(fetch = FetchType.LAZY)
+    private Moim moim;
 }
