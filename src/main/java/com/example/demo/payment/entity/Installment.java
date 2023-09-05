@@ -1,4 +1,4 @@
-package com.example.demo.moim.entity;
+package com.example.demo.payment.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,16 +7,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Getter
-@Builder
 @AllArgsConstructor
+@Builder
 @NoArgsConstructor
-public class MoimOption {
+@Getter
+public class Installment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String optionName;
-    private Long optionPrice;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Moim moim;
+
+    private Long amount;
+    private String merchantUid;
+    @ManyToOne
+    private Payment payment;
 }

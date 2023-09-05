@@ -20,6 +20,8 @@ public class Moim {
     private Long id;
     private String title;
     private String content;
+    @Formula("(select sum(o.option_price) from moim_option o where o.moim_id = id)")
+    private Long totalPrice;
     private Integer maxNumOfUsers;
     private Integer minNumOfUsers;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "moim")

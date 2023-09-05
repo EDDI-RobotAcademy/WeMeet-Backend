@@ -10,5 +10,5 @@ import lombok.Getter;
 public class MoimOptionDto {
     private Long id;
     private String optionName;
-    private String optionPrice;
+    private Long optionPrice;
 }

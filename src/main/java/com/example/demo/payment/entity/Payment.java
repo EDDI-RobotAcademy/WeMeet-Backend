@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -19,4 +21,12 @@ public class Payment {
     private Long totalPrice;
     @OneToOne(fetch = FetchType.LAZY)
     private Participant participant;
+
+    private Integer numInstallments;
+    private String customerUid;
+    private String pgProvider;
+    private String payMethod;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    private List<Installment> installment;
 }
