@@ -99,45 +99,48 @@ public class PaymentServiceImpl implements PaymentService {
         payment.getInstallment().add(firstInstallment);
         paymentRepository.save(payment);
 
-        reserveNextPay(payment);
+        reservePays(payment);
 
         Map<String, Object> responseMap = Map.of("success", true);
         return ResponseEntity.ok(responseMap);
     }
 
-    private void reserveNextPay(Payment payment) {
-
-        if (payment.getInstallment().size() < payment.getNumInstallments()) {
-            log.info("reserveNextPay()");
-            String accessToken = getAccessToken();
-            String url = "https://api.iamport.kr/subscribe/payments/schedule";
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("Authorization", "Bearer " + accessToken);
-
-            JsonObject requestJson = new JsonObject();
-            requestJson.addProperty("customer_uid", payment.getCustomerUid());
-
-            JsonObject schedulesData = new JsonObject();
-            schedulesData.addProperty("merchant_uid", UUID.randomUUID().toString());
-            // millisecond to second 하기 위해 1000 나눠
-            schedulesData.addProperty("schedule_at", Timestamp.valueOf(LocalDateTime.now().plusMinutes(1)).getTime()/1000);
-            log.info(String.valueOf(Timestamp.valueOf(LocalDateTime.now().plusMinutes(1)).getTime()/1000));
-            schedulesData.addProperty("amount", payment.getInstallment().get(0).getAmount());
-            schedulesData.addProperty("name", "get-moim");
-
-            JsonArray jsonArray = new JsonArray();
-            jsonArray.add(schedulesData);
-            requestJson.add("schedules", jsonArray);
-            System.out.println(requestJson);
-            HttpEntity requestEntity = new HttpEntity<String>(requestJson.toString(), headers);
-
-            UriComponents uri = UriComponentsBuilder.fromHttpUrl(url).build();
-            RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<Map> responseEntity = restTemplate.exchange(uri.toString(), HttpMethod.POST, requestEntity, Map.class);
-            System.out.println(responseEntity.toString());
+    private void reservePays(Payment payment) {
+        for (int i = 1; i < payment.getNumInstallments(); i++) {
+            reserveNextPay(payment, i);
         }
+    }
+
+    private void reserveNextPay(Payment payment, int i) {
+
+        log.info("reserveNextPay()");
+        String accessToken = getAccessToken();
+        String url = "https://api.iamport.kr/subscribe/payments/schedule";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authorization", "Bearer " + accessToken);
+
+        JsonObject requestJson = new JsonObject();
+        requestJson.addProperty("customer_uid", payment.getCustomerUid());
+
+        JsonObject schedulesData = new JsonObject();
+        schedulesData.addProperty("merchant_uid", UUID.randomUUID().toString());
+        // millisecond to second 하기 위해 1000 나눠
+        schedulesData.addProperty("schedule_at", Timestamp.valueOf(LocalDateTime.now().plusMinutes(i)).getTime() / 1000);
+        log.info(String.valueOf(Timestamp.valueOf(LocalDateTime.now().plusMinutes(i)).getTime() / 1000));
+        schedulesData.addProperty("amount", payment.getInstallment().get(0).getAmount());
+        schedulesData.addProperty("name", "get-moim");
+
+        JsonArray jsonArray = new JsonArray();
+        jsonArray.add(schedulesData);
+        requestJson.add("schedules", jsonArray);
+        System.out.println(requestJson);
+        HttpEntity requestEntity = new HttpEntity<String>(requestJson.toString(), headers);
+
+        UriComponents uri = UriComponentsBuilder.fromHttpUrl(url).build();
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Map> responseEntity = restTemplate.exchange(uri.toString(), HttpMethod.POST, requestEntity, Map.class);
     }
 
     private String getAccessToken() {
