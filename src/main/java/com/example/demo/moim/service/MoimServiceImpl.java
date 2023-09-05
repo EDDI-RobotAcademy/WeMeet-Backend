@@ -60,10 +60,6 @@ public class MoimServiceImpl implements MoimService {
                         .build())
                 .toList());
         Participant participant = new Participant(user, moim);
-        participant.setPayment(Payment.builder()
-                        .totalPrice(reqForm.getPaymentInfo().getTotalPrice())
-                        .participant(participant)
-                .build());
         moim.getParticipants().add(participant);
 
         moim.setState(State.builder()

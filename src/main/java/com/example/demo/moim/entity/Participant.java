@@ -18,7 +18,7 @@ public class Participant {
     private Moim moim;
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.LAZY)
     @Setter
     private Payment payment;
 

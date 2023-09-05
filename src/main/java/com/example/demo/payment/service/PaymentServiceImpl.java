@@ -78,6 +78,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<Map<String, Object>> firstPay(Long moimId, PaymentReqForm reqForm) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
@@ -99,6 +100,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .payment(payment)
                 .build();
         payment.getInstallment().add(firstInstallment);
+        participant.setPayment(payment);
         paymentRepository.save(payment);
 
 //        reservePays(payment);
