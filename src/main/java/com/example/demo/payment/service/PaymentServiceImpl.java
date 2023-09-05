@@ -20,6 +20,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -43,7 +44,6 @@ public class PaymentServiceImpl implements PaymentService {
     private String impSecret;
 
     @Override
-    @Transactional
     public ResponseEntity<Map<String, Object>> getPaymentInfo(Long moimId) {
         Moim moim = moimRepository.findById(moimId).get();
 
@@ -99,10 +99,17 @@ public class PaymentServiceImpl implements PaymentService {
         payment.getInstallment().add(firstInstallment);
         paymentRepository.save(payment);
 
-        reservePays(payment);
+//        reservePays(payment);
 
         Map<String, Object> responseMap = Map.of("success", true);
         return ResponseEntity.ok(responseMap);
+    }
+
+    @Override
+    public ResponseEntity<Map<String, Object>> webHook(@RequestBody Map req) {
+        log.info("web-hook()");
+        log.info(req.toString());
+        return ResponseEntity.ok().build();
     }
 
     private void reservePays(Payment payment) {

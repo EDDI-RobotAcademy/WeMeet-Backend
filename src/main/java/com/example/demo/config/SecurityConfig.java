@@ -40,7 +40,7 @@ public class SecurityConfig {
 
         http.cors();
 
-        http.csrf(AbstractHttpConfigurer::disable);
+        http.csrf().disable();
 
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());
@@ -59,8 +59,8 @@ public class SecurityConfig {
 
         return http
                 .authorizeHttpRequests((authorizeRequests) -> {
-                    authorizeRequests.requestMatchers("/user/sign-up", "/jwt/refresh", "/oauth", "/oauth/google-login", "oauth/google","/user/check-nickname/**","/user/check-email/**"
-                            ,"/oauth/kakao" ,"/oauth/kakao-login", "/moim/{id}",  "/moim/list", "/moim/{id}/joinable", "/payment")
+                    authorizeRequests.requestMatchers("/user/sign-up", "/jwt/refresh", "/oauth", "/oauth/google-login", "/oauth/google","/user/check-nickname/**","/user/check-email/**"
+                            ,"/oauth/kakao" ,"/oauth/kakao-login", "/moim/{id}",  "/moim/list", "/moim/{id}/joinable", "/payment", "/payment/hook")
                             .permitAll();
                     authorizeRequests.requestMatchers("/user", "/moim", "/moim/{id}/user", "/travel/country/list", "/travel/city/list", "/travel/option/list", "/payment/moim/{moimId}")
                             .hasAnyRole("NORMAL", "ADMIN");
@@ -68,6 +68,7 @@ public class SecurityConfig {
                             .authenticated();
                     authorizeRequests.requestMatchers("/travel", "/travel/country/list")
                             .hasAnyRole("ADMIN");
+
                 })
                 .build();
     }

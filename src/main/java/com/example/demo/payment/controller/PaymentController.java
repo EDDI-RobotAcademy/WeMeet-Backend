@@ -21,6 +21,10 @@ public class PaymentController {
     public ResponseEntity<Map<String, Object>> firstPay(@PathVariable Long moimId, @RequestBody PaymentReqForm reqForm) {
         return paymentService.firstPay(moimId, reqForm);
     }
+    @PostMapping("/hook")
+    public ResponseEntity<Map<String, Object>> webHook(@RequestBody Map requestMap) {
+        return paymentService.webHook(requestMap);
+    }
 
     @GetMapping
     public void secondaryPay() {
