@@ -13,4 +13,5 @@ public interface TravelService {
 
     ResponseEntity<List<String>> getCities(String country);
 
+    ResponseEntity<List<String>> getAirports();
 }

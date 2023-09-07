@@ -18,6 +18,8 @@ public class Travel {
 
     private String country;
     private String city;
+    @Enumerated(EnumType.STRING)
+    private Airport depatureAirport;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "travel", orphanRemoval = true)
     @Setter

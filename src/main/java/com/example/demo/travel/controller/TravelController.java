@@ -26,5 +26,10 @@ public class TravelController {
         return travelService.getCities(country);
     }
 
+    @GetMapping("/airport/list")
+    public ResponseEntity<List<String>> getAirports() {
+        return travelService.getAirports();
+    }
+
 
 }
