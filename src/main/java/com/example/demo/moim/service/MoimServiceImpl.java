@@ -3,12 +3,14 @@ package com.example.demo.moim.service;
 import com.example.demo.moim.controller.form.MoimReqForm;
 import com.example.demo.moim.controller.form.dto.*;
 import com.example.demo.moim.controller.form.moimReqForm.OptionInfo;
+import com.example.demo.moim.controller.form.moimReqForm.ParticipantsInfo;
 import com.example.demo.moim.entity.*;
 import com.example.demo.moim.repository.MoimRepository;
 import com.example.demo.moim.repository.ParticipantRepository;
 import com.example.demo.security.costomUser.CustomUserDetails;
 import com.example.demo.travel.entity.Airport;
 import com.example.demo.travel.repository.TravelRepository;
+import com.example.demo.user.controller.form.UserDto;
 import com.example.demo.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -145,6 +147,22 @@ public class MoimServiceImpl implements MoimService {
                     .runwayStartDate(state.getStartDate())
                     .build();
 
+            MoimParticipantsInfo participantsInfo = savedMoim.getParticipantsInfo();
+            MoimParticipantsInfoDto participantsInfoDto = MoimParticipantsInfoDto.builder()
+                    .maxNumOfUsers(participantsInfo.getMaxNumOfUsers())
+                    .minNumOfUsers(participantsInfo.getMinNumOfUsers())
+                    .participants(participantsInfo.getParticipants().stream().map((p)-> ParticipantDto.builder()
+                            .id(p.getId())
+                            .user(UserDto.builder()
+                                    .id(p.getUser().getId())
+                                    .name(p.getUser().getName())
+                                    .nickname(p.getUser().getNickname())
+                                    .email(p.getUser().getEmail())
+                                    .build())
+                            .build()).toList())
+                    .currentParticipantsNumber(participantsInfo.getCurrentParticipantsNumber())
+                    .build();
+
             MoimDto moimDto = MoimDto.builder()
                     .id(savedMoim.getId())
                     .moimDestination(moimDestinationDto)
@@ -152,12 +170,14 @@ public class MoimServiceImpl implements MoimService {
                     .paymentInfo(paymentInfoDto)
                     .moimContents(contentsDto)
                     .createdDate(savedMoim.getCreatedDate())
+                    .moimParticipantsInfo(participantsInfoDto)
                     .build();
             return ResponseEntity.ok(moimDto);
         }
     }
 
     @Override
+    @Transactional
     public ResponseEntity<MoimDto> joinMoim(Long id) {
         Optional<Moim> savedMoim = moimRepository.findById(id);
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
