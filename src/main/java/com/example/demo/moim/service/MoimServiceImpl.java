@@ -146,6 +146,7 @@ public class MoimServiceImpl implements MoimService {
                     .build();
 
             MoimDto moimDto = MoimDto.builder()
+                    .id(savedMoim.getId())
                     .moimDestination(moimDestinationDto)
                     .state(stateDto)
                     .paymentInfo(paymentInfoDto)
@@ -187,6 +188,7 @@ public class MoimServiceImpl implements MoimService {
         List<MoimDto> responseList = moimList.stream()
                 .map((m) ->
                         MoimDto.builder()
+                                .id(m.getId())
                                 .moimDestination(MoimDestinationDto.builder()
                                         .departureAirport(m.getDestination().getDepartureAirport())
                                         .city(m.getDestination().getCity())
