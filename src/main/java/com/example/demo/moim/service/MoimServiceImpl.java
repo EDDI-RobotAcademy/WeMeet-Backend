@@ -1,15 +1,13 @@
 package com.example.demo.moim.service;
 
-import com.example.demo.moim.controller.form.dto.MoimDestinationDto;
-import com.example.demo.moim.controller.form.dto.MoimDto;
 import com.example.demo.moim.controller.form.MoimReqForm;
-import com.example.demo.moim.controller.form.dto.MoimOptionDto;
-import com.example.demo.moim.controller.form.dto.ParticipantDto;
+import com.example.demo.moim.controller.form.dto.*;
+import com.example.demo.moim.controller.form.moimReqForm.OptionInfo;
 import com.example.demo.moim.entity.*;
 import com.example.demo.moim.repository.MoimRepository;
 import com.example.demo.moim.repository.ParticipantRepository;
-import com.example.demo.payment.entity.Payment;
 import com.example.demo.security.costomUser.CustomUserDetails;
+import com.example.demo.travel.entity.Airport;
 import com.example.demo.travel.repository.TravelRepository;
 import com.example.demo.user.entity.User;
 import jakarta.transaction.Transactional;
@@ -38,57 +36,65 @@ public class MoimServiceImpl implements MoimService {
     public ResponseEntity<MoimDto> createMoim(MoimReqForm reqForm) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        Moim moim = Moim.builder()
+        MoimContents moimContents = MoimContents.builder()
                 .title(reqForm.getBasicInfo().getTitle())
                 .content(reqForm.getBasicInfo().getContent())
+                .build();
+
+        State state = State.builder()
+                .runwayStartDate(reqForm.getStateInfo().getRunwayStartDate())
+                .takeoffStartDate(reqForm.getStateInfo().getTakeoffStartDate())
+                .startDate(reqForm.getStateInfo().getStartDate())
+                .departureDate(reqForm.getStateInfo().getDepartureDate())
+                .taxxingPeriod(reqForm.getStateInfo().getTaxxingPeriod())
+                .runwayPeriod(reqForm.getStateInfo().getRunwayPeriod())
+                .takeoffPeriod(reqForm.getStateInfo().getTakeoffPeriod())
+                .returnDate(reqForm.getStateInfo().getReturnDate())
+                .state(StateType.TAXXING)
+                .build();
+
+        List<MoimOption> options = reqForm.getOptionsInfo().stream()
+                .map((oi) -> MoimOption.builder()
+                        .optionName(oi.getOptionName())
+                        .optionPrice(oi.getOptionPrice()).build()).toList();
+
+        MoimDestination moimDestination = MoimDestination.builder()
+                .country(reqForm.getDestinationInfo().getCountry())
+                .city(reqForm.getDestinationInfo().getCity())
+                .departureAirport(Airport.valueOf(reqForm.getDestinationInfo().getDepartureAirport()))
+                .moimOptions(options)
+                .build();
+
+        MoimPaymentInfo paymentInfo = MoimPaymentInfo.builder()
+                .totalPrice(reqForm.getOptionsInfo().stream().map(OptionInfo::getOptionPrice).reduce(Long::sum).orElse(0L))
+                .numInstallments(reqForm.getStateInfo().getRunwayPeriod())
+                .build();
+        paymentInfo.setAmountInstallment(paymentInfo.getTotalPrice()/ paymentInfo.getNumInstallments());
+
+        MoimParticipantsInfo participantsInfo = MoimParticipantsInfo.builder()
                 .maxNumOfUsers(reqForm.getParticipantsInfo().getMaxParticipants())
                 .minNumOfUsers(reqForm.getParticipantsInfo().getMinParticipants())
                 .participants(new ArrayList<>())
                 .build();
 
-        moim.setDestination(MoimDestination.builder()
-                .country(reqForm.getDestinationInfo().getCountry())
-                .city(reqForm.getDestinationInfo().getCity())
-                .moim(moim)
-                .build());
+        Moim moim = Moim.builder()
+                .contents(moimContents)
+                .moimPaymentInfo(paymentInfo)
+                .participantsInfo(participantsInfo)
+                .state(state)
+                .destination(moimDestination)
+                .build();
 
-        moim.setOptions(reqForm.getOptionsInfo().stream()
-                .map((oi) -> MoimOption.builder()
-                        .optionName(oi.getOptionName())
-                        .optionPrice(oi.getOptionPrice())
-                        .moim(moim)
-                        .build())
-                .toList());
-        Participant participant = new Participant(user, moim);
-        moim.getParticipants().add(participant);
-
-        moim.setState(State.builder()
-                        .runwayStartDate(reqForm.getStateInfo().getRunwayStartDate())
-                        .takeoffStartDate(reqForm.getStateInfo().getTakeoffStartDate())
-                        .startDate(reqForm.getStateInfo().getStartDate())
-                        .departureDate(reqForm.getStateInfo().getDepartureDate())
-                        .taxxingPeriod(reqForm.getStateInfo().getTaxxingPeriod())
-                        .runwayPeriod(reqForm.getStateInfo().getRunwayPeriod())
-                        .takeoffPeriod(reqForm.getStateInfo().getTakeoffPeriod())
-                        .returnDate(reqForm.getStateInfo().getReturnDate())
-                        .state(StateType.TAXXING)
-                        .moim(moim)
-                .build());
+        moimDestination.setMoim(moim);
+        paymentInfo.setMoim(moim);
+        participantsInfo.setMoim(moim);
+        state.setMoim(moim);
         moimRepository.save(moim);
+
+        joinMoim(moim.getId());
 
         MoimDto moimDto = MoimDto.builder()
                 .id(moim.getId())
-                .content(moim.getContent())
-                .maxNumOfUsers(moim.getMaxNumOfUsers())
-                .minNumOfUsers(moim.getMinNumOfUsers())
-                .createdDate(moim.getCreatedDate())
-                .currentParticipantsNumber(moim.getCurrentParticipantsNumber())
-                .participants(List.of(ParticipantDto.builder()
-                        .id(user.getId())
-                        .name(user.getName())
-                        .nickname(user.getNickname())
-                        .email(user.getEmail())
-                        .build()))
                 .build();
         return ResponseEntity.ok(moimDto);
     }
@@ -96,40 +102,55 @@ public class MoimServiceImpl implements MoimService {
     @Override
     @Transactional
     public ResponseEntity<MoimDto> requestMoim(Long id) {
-        Optional<Moim> savedMoim = moimRepository.findById(id);
-        if (savedMoim.isEmpty()) {
+        Optional<Moim> maybeMoim = moimRepository.findById(id);
+        if (maybeMoim.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT)
                     .build();
 
         } else {
-            Moim moim = savedMoim.get();
+            Moim savedMoim = maybeMoim.get();
+            MoimDestinationDto moimDestinationDto = MoimDestinationDto.builder()
+                    .country(savedMoim.getDestination().getCountry())
+                    .city(savedMoim.getDestination().getCity())
+                    .departureAirport(savedMoim.getDestination().getDepartureAirport())
+                    .options(savedMoim.getDestination().getMoimOptions().stream().map((o)-> MoimOptionDto.builder()
+                            .id(o.getId())
+                            .optionName(o.getOptionName())
+                            .optionPrice(o.getOptionPrice())
+                            .build()).toList())
+                    .build();
+
+            MoimContentsDto contentsDto = MoimContentsDto.builder()
+                    .id(savedMoim.getContents().getId())
+                    .title(savedMoim.getContents().getTitle())
+                    .content(savedMoim.getContents().getContent())
+                    .build();
+
+            MoimPaymentInfoDto paymentInfoDto = MoimPaymentInfoDto.builder()
+                    .id(savedMoim.getMoimPaymentInfo().getId())
+                    .amountInstallment(savedMoim.getMoimPaymentInfo().getAmountInstallment())
+                    .totalPrice(savedMoim.getMoimPaymentInfo().getTotalPrice())
+                    .build();
+
+            State state = savedMoim.getState();
+            StateDto stateDto = StateDto.builder()
+                    .id(state.getId())
+                    .returnDate(state.getReturnDate())
+                    .taxxingPeriod(state.getTaxxingPeriod())
+                    .takeoffPeriod(state.getTakeoffPeriod())
+                    .runwayPeriod(state.getRunwayPeriod())
+                    .departureDate(state.getDepartureDate())
+                    .startDate(state.getDepartureDate())
+                    .takeoffStartDate(state.getTakeoffStartDate())
+                    .runwayStartDate(state.getStartDate())
+                    .build();
+
             MoimDto moimDto = MoimDto.builder()
-                    .id(moim.getId())
-                    .content(moim.getContent())
-                    .maxNumOfUsers(moim.getMaxNumOfUsers())
-                    .minNumOfUsers(moim.getMinNumOfUsers())
-                    .createdDate(moim.getCreatedDate())
-                    .currentParticipantsNumber(moim.getCurrentParticipantsNumber())
-                    .participants(
-                            participantRepository.findAllByMoim(moim).stream()
-                                    .map((p) -> ParticipantDto.builder()
-                                            .id(p.getUser().getId())
-                                            .nickname(p.getUser().getNickname())
-                                            .build())
-                                    .toList()
-                    )
-                    .destination(MoimDestinationDto.builder()
-                            .id(moim.getDestination().getId())
-                            .city(moim.getDestination().getCity())
-                            .country(moim.getDestination().getCountry())
-                            .build())
-                    .options(moim.getOptions().stream()
-                            .map((o)-> MoimOptionDto.builder()
-                                    .id(o.getId())
-                                    .optionName(o.getOptionName())
-                                    .optionPrice(o.getOptionPrice())
-                                    .build())
-                            .toList())
+                    .moimDestination(moimDestinationDto)
+                    .state(stateDto)
+                    .paymentInfo(paymentInfoDto)
+                    .moimContents(contentsDto)
+                    .createdDate(savedMoim.getCreatedDate())
                     .build();
             return ResponseEntity.ok(moimDto);
         }
@@ -145,21 +166,16 @@ public class MoimServiceImpl implements MoimService {
                     .build();
         } else {
             Moim moim = savedMoim.get();
-            Participant participant = new Participant(user, moim);
-            moim.getParticipants().add(participant);
-            participantRepository.save(participant);
-            moimRepository.save(moim);
-            MoimDto moimDto = MoimDto.builder()
-                    .title(moim.getTitle())
-                    .content(moim.getContent())
-                    .maxNumOfUsers(moim.getMaxNumOfUsers())
-                    .minNumOfUsers(moim.getMinNumOfUsers())
-                    .id(moim.getId())
-                    .createdDate(moim.getCreatedDate())
-                    .currentParticipantsNumber(moim.getCurrentParticipantsNumber())
+            Participant participant = Participant.builder()
+                    .user(user)
+                    .moimParticipantsInfo(moim.getParticipantsInfo())
                     .build();
-            return ResponseEntity.ok()
-                    .body(moimDto);
+            participantRepository.save(participant);
+
+            MoimParticipantsInfo participantsInfo = moim.getParticipantsInfo();
+            participantsInfo.getParticipants().add(participant);
+            moimRepository.save(moim);
+            return requestMoim(id);
         }
     }
 
@@ -171,13 +187,25 @@ public class MoimServiceImpl implements MoimService {
         List<MoimDto> responseList = moimList.stream()
                 .map((m) ->
                         MoimDto.builder()
-                                .id(m.getId())
-                                .title(m.getTitle())
-                                .content(m.getContent())
-                                .minNumOfUsers(m.getMinNumOfUsers())
-                                .maxNumOfUsers(m.getMaxNumOfUsers())
-                                .currentParticipantsNumber(m.getCurrentParticipantsNumber())
-                                .createdDate(m.getCreatedDate())
+                                .moimDestination(MoimDestinationDto.builder()
+                                        .departureAirport(m.getDestination().getDepartureAirport())
+                                        .city(m.getDestination().getCity())
+                                        .country(m.getDestination().getCountry())
+                                        .build())
+                                .moimContents(MoimContentsDto.builder()
+                                        .content(m.getContents().getContent())
+                                        .title(m.getContents().getTitle())
+                                        .build())
+                                .moimParticipantsInfo(MoimParticipantsInfoDto.builder()
+                                        .minNumOfUsers(m.getParticipantsInfo().getMinNumOfUsers())
+                                        .maxNumOfUsers(m.getParticipantsInfo().getMaxNumOfUsers())
+                                        .currentParticipantsNumber(m.getParticipantsInfo().getCurrentParticipantsNumber())
+                                        .build())
+                                .paymentInfo(MoimPaymentInfoDto.builder()
+                                        .numInstallments(m.getMoimPaymentInfo().getNumInstallments())
+                                        .totalPrice(m.getMoimPaymentInfo().getTotalPrice())
+                                        .amountInstallment(m.getMoimPaymentInfo().getAmountInstallment())
+                                        .build())
                                 .build()
                 ).toList();
 
@@ -185,6 +213,7 @@ public class MoimServiceImpl implements MoimService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<Map<String, Object>> getJoinable(Long id) {
         Optional<Moim> maybeMoim = moimRepository.findById(id);
         if (maybeMoim.isEmpty()) {
@@ -193,7 +222,7 @@ public class MoimServiceImpl implements MoimService {
         }
         Moim moim = maybeMoim.get();
         Map<String, Object> responseMap;
-        if (moim.getCurrentParticipantsNumber() < moim.getMaxNumOfUsers()) {
+        if (moim.getParticipantsInfo().getCurrentParticipantsNumber() < moim.getParticipantsInfo().getMaxNumOfUsers()) {
             responseMap = Map.of("joinable", true);
         } else {
             responseMap = Map.of("joinable", false);

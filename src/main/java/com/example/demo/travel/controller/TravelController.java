@@ -30,6 +30,10 @@ public class TravelController {
     public ResponseEntity<List<String>> getAirports() {
         return travelService.getAirports();
     }
+    @GetMapping(value = "/airport/list", params = {"country", "city"})
+    public ResponseEntity<List<String>> getAirports(@RequestParam String country, @RequestParam String city) {
+        return travelService.getAirports(country, city);
+    }
 
 
 }

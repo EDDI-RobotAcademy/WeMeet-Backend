@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    @Query("select p from Payment p where p.participant.moim.id = :moimId")
+    @Query("select p from Payment p where p.paymentInfo.moim.id = :moimId")
     Payment findByMoimId(Long moimId);
 }

@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Getter
-public class MoimOptionDto {
+public class MoimContentsDto {
     private Long id;
-    private String optionName;
-    private Long optionPrice;
+    private String content;
+    private String title;
+
 }

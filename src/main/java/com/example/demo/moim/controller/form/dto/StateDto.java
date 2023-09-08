@@ -1,20 +1,24 @@
-package com.example.demo.moim.entity;
+package com.example.demo.moim.controller.form.dto;
 
-import jakarta.persistence.*;
-import lombok.*;
+import com.example.demo.moim.entity.Moim;
+import com.example.demo.moim.entity.StateType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Entity
 @NoArgsConstructor
-@Builder
 @AllArgsConstructor
+@Builder
 @Getter
-public class State {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class StateDto {
     private Long id;
-    @Enumerated(EnumType.STRING)
     private StateType state;
     private LocalDateTime startDate;
     private LocalDateTime runwayStartDate;
@@ -24,7 +28,4 @@ public class State {
     private Integer taxxingPeriod;
     private Integer runwayPeriod;
     private Integer takeoffPeriod;
-    @Setter
-    @OneToOne(fetch = FetchType.LAZY)
-    private Moim moim;
 }

@@ -1,11 +1,14 @@
 package com.example.demo.payment.entity;
 
+import com.example.demo.moim.entity.MoimPaymentInfo;
 import com.example.demo.moim.entity.Participant;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -18,7 +21,6 @@ public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long totalPrice;
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "payment", cascade = CascadeType.PERSIST)
     private Participant participant;
 
@@ -27,6 +29,8 @@ public class Payment {
     private String pgProvider;
     private String payMethod;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    private List<Installment> installment;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "payment")
+    private List<Installment> installments;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    private MoimPaymentInfo paymentInfo;
 }
