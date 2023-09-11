@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -84,5 +85,32 @@ public class BoardSerivceImpl implements BoardSerivce {
                         .build()
                 ).toList();
         return ResponseEntity.ok(responseDtoList);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<BoardDto> getBoard(Long boardId, String category) {
+        Board board = boardRepository.findById(boardId).get();
+        Map<String, Object> addtionalInfo = switch (category) {
+            case "moim" -> getMoimBoardInfo(board);
+            default -> Map.of();
+        };
+
+        BoardDto boardDto = BoardDto.builder()
+                .id(board.getId())
+                .writer(WriterDto.builder()
+                        .id(board.getWriter().getUser().getId())
+                        .nickName(board.getWriter().getUser().getNickname())
+                        .build())
+                .contents(BoardContentsDto.builder()
+                        .content(board.getContents().getContent())
+                        .title(board.getContents().getTitle())
+                        .build())
+                .build();
+        return ResponseEntity.ok(boardDto);
+    }
+    private Map<String, Object> getMoimBoardInfo(Board board) {
+        MoimBoard moimBoard = (MoimBoard) board;
+        return Map.of("commentList", "commentList");
     }
 }

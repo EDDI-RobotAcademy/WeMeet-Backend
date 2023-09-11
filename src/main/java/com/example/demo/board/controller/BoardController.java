@@ -21,4 +21,8 @@ public class BoardController {
     public ResponseEntity<List<BoardDto>> getMoimBoardList(@PathVariable Long moimId, @RequestParam Integer page, @RequestParam Integer size) {
         return boardSerivce.getMoimBoardList(moimId, page, size);
     }
+    @GetMapping(value = "/{category}/{boardId}")
+    public ResponseEntity<BoardDto> getBoard(@PathVariable Long boardId, @PathVariable String category) {
+        return boardSerivce.getBoard(boardId, category);
+    }
 }

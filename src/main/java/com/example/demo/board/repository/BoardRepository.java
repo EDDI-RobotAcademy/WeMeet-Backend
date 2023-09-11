@@ -11,4 +11,11 @@ import java.util.List;
 public interface BoardRepository extends JpaRepository<Board, Long> {
     @Query("select mb from MoimBoard mb join fetch mb.writer.user join fetch mb.contents where mb.moim.id=:moimId")
     List<MoimBoard> findAllMoimBoardWithPageable(Long moimId, Pageable pageable);
+
+    @Query("select b from Board b join fetch b.writer " +
+            "join fetch b.contents " +
+            "join fetch b.writer " +
+            "left join fetch b.writer.user " +
+            "where b.id=:boardId")
+    Board findByMoimId(Long boardId);
 }

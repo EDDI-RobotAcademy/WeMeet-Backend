@@ -9,4 +9,6 @@ public interface BoardSerivce {
     ResponseEntity<BoardDto> post(Long moimId, BoardDto req);
 
     ResponseEntity<List<BoardDto>> getMoimBoardList(Long moimId, Integer page, Integer size);
+
+    ResponseEntity<BoardDto> getBoard(Long boardId, String category);
 }
