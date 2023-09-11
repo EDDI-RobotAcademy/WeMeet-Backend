@@ -2,15 +2,13 @@ package com.example.demo.board.entity;
 
 import com.example.demo.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
 public class Writer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

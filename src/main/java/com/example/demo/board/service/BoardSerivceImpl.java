@@ -2,6 +2,7 @@ package com.example.demo.board.service;
 
 import com.example.demo.board.controller.dto.BoardContentsDto;
 import com.example.demo.board.controller.dto.BoardDto;
+import com.example.demo.board.controller.dto.WriterDto;
 import com.example.demo.board.entity.*;
 import com.example.demo.board.repository.BoardRepository;
 import com.example.demo.moim.repository.MoimRepository;
@@ -9,11 +10,15 @@ import com.example.demo.security.costomUser.CustomUserDetails;
 import com.example.demo.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -57,5 +62,27 @@ public class BoardSerivceImpl implements BoardSerivce {
                 .build();
 
         return ResponseEntity.ok(boardDto);
+    }
+
+    @Override
+    public ResponseEntity<List<BoardDto>> getMoimBoardList(Long moimId, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+        List<MoimBoard> boardList =boardRepository.findAllMoimBoardWithPageable(moimId, pageable);
+        List<BoardDto> responseDtoList = boardList.stream().map((b)->
+                BoardDto.builder()
+                        .id(b.getId())
+                        .isPublic(b.getIsPublic())
+                        .contents(
+                                BoardContentsDto.builder()
+                                        .title(b.getContents().getTitle())
+                                        .build()
+                        )
+                        .writer(WriterDto.builder()
+                                .id(b.getWriter().getUser().getId())
+                                .nickName(b.getWriter().getUser().getNickname())
+                                .build())
+                        .build()
+                ).toList();
+        return ResponseEntity.ok(responseDtoList);
     }
 }

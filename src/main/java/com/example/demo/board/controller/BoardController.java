@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/board")
 @RequiredArgsConstructor
@@ -14,5 +16,9 @@ public class BoardController {
     @PostMapping("/moim/{moimId}")
     public ResponseEntity<BoardDto> postMoimBoard(@PathVariable Long moimId, @RequestBody BoardDto req) {
         return boardSerivce.post(moimId, req);
+    }
+    @GetMapping(value = "/list/moim/{moimId}", params = {"page", "size"})
+    public ResponseEntity<List<BoardDto>> getMoimBoardList(@PathVariable Long moimId, @RequestParam Integer page, @RequestParam Integer size) {
+        return boardSerivce.getMoimBoardList(moimId, page, size);
     }
 }
