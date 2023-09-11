@@ -1,5 +1,6 @@
 package com.example.demo.moim.entity;
 
+import com.example.demo.board.entity.MoimBoard;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -30,4 +31,6 @@ public class Moim {
     private MoimParticipantsInfo participantsInfo;
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private MoimContents contents;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "moim")
+    private List<MoimBoard> boards;
 }
