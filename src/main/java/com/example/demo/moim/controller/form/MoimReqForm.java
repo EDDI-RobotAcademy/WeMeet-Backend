@@ -1,9 +1,6 @@
 package com.example.demo.moim.controller.form;
 
-import com.example.demo.moim.controller.form.moimReqForm.BasicInfo;
-import com.example.demo.moim.controller.form.moimReqForm.DestinationInfo;
-import com.example.demo.moim.controller.form.moimReqForm.OptionInfo;
-import com.example.demo.moim.controller.form.moimReqForm.ParticipantsInfo;
+import com.example.demo.moim.controller.form.moimReqForm.*;
 import lombok.Getter;
 
 import java.util.List;
@@ -14,4 +11,6 @@ public class MoimReqForm {
     private DestinationInfo destinationInfo;
     private ParticipantsInfo participantsInfo;
     private List<OptionInfo> optionsInfo;
+    private stateInfo stateInfo;
+    private PaymentInfo paymentInfo;
 }

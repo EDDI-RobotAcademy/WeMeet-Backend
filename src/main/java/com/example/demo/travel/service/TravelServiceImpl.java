@@ -2,6 +2,7 @@ package com.example.demo.travel.service;
 
 import com.example.demo.travel.controller.dto.TravelDto;
 import com.example.demo.travel.controller.dto.TravelOptionDto;
+import com.example.demo.travel.entity.Airport;
 import com.example.demo.travel.entity.Travel;
 import com.example.demo.travel.entity.TravelOption;
 import com.example.demo.travel.repository.TravelOptionRepository;
@@ -11,8 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -24,12 +25,13 @@ public class TravelServiceImpl implements TravelService{
     @Override
     @Transactional
     public ResponseEntity<TravelDto> createTravel(TravelDto reqForm) {
-        Optional<Travel> maybeTravel = travelRepository.findByCity(reqForm.getCity());
+        Optional<Travel> maybeTravel = travelRepository.findByCityAndAirPort(reqForm.getCity(), Airport.valueOf(reqForm.getDepartureAirport()));
         Travel travel;
         if(maybeTravel.isEmpty()) {
             travel = Travel.builder()
                     .city(reqForm.getCity())
                     .country(reqForm.getCountry())
+                    .depatureAirport(Airport.valueOf(reqForm.getDepartureAirport()))
                     .build();
             List<TravelOptionDto> travelOptionDtoList = reqForm.getAdditionalOptions();
             List<TravelOption> travelOptionList = travelOptionDtoList.stream().map((tod)->new TravelOption(tod, travel)).toList();
@@ -78,6 +80,18 @@ public class TravelServiceImpl implements TravelService{
         List<String> responseList = travelRepository.findCitiesByCountry(country);
         return ResponseEntity.ok()
                 .body(responseList);
+    }
+
+    @Override
+    public ResponseEntity<List<String>> getAirports() {
+        List<String> responseList = Arrays.stream(Airport.values()).map(Enum::toString).toList();
+        return ResponseEntity.ok(responseList);
+    }
+
+    @Override
+    public ResponseEntity<List<String>> getAirports(String country, String city) {
+        List<String> responseList = travelRepository.findAirportsByCountryAndCity(country, city);
+        return ResponseEntity.ok(responseList);
     }
 
 }

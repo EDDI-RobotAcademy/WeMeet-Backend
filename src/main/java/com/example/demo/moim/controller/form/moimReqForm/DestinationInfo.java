@@ -6,4 +6,5 @@ import lombok.Getter;
 public class DestinationInfo {
     private String country;
     private String city;
+    private String departureAirport;
 }

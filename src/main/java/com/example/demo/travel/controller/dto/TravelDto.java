@@ -1,6 +1,5 @@
 package com.example.demo.travel.controller.dto;
 
-import jdk.jshell.Snippet;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,5 +13,7 @@ public class TravelDto {
     private Long id;
     private String country;
     private String city;
+    private String departureAirport;
+
     private List<TravelOptionDto> additionalOptions;
 }

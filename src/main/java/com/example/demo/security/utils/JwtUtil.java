@@ -24,7 +24,7 @@ public class JwtUtil {
 
     public boolean isTokenCheckFilterExcludeUris(String uri) {
         for (String excludeUri: tokenCheckFilterExcludeUris) {
-            if(uri.startsWith(excludeUri)) {
+            if(uri.equals(excludeUri)) {
                 return true;
             }
         }
