@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/board")
@@ -24,5 +25,9 @@ public class BoardController {
     @GetMapping(value = "/{category}/{boardId}")
     public ResponseEntity<BoardDto> getBoard(@PathVariable Long boardId, @PathVariable String category) {
         return boardSerivce.getBoard(boardId, category);
+    }
+    @PutMapping(value="/{category}/{boardId}")
+    public ResponseEntity<Map<String, Object>> modifyBoard(@PathVariable Long boardId, @PathVariable String category, @RequestBody BoardDto req) {
+        return boardSerivce.modifyBoard(boardId, category, req);
     }
 }

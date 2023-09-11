@@ -72,6 +72,7 @@ public class BoardSerivceImpl implements BoardSerivce {
         List<BoardDto> responseDtoList = boardList.stream().map((b)->
                 BoardDto.builder()
                         .id(b.getId())
+                        .category(b.getCategory().toString())
                         .isPublic(b.getIsPublic())
                         .contents(
                                 BoardContentsDto.builder()
@@ -92,12 +93,13 @@ public class BoardSerivceImpl implements BoardSerivce {
     public ResponseEntity<BoardDto> getBoard(Long boardId, String category) {
         Board board = boardRepository.findById(boardId).get();
         Map<String, Object> addtionalInfo = switch (category) {
-            case "moim" -> getMoimBoardInfo(board);
+            case "MOIM" -> getMoimBoardInfo(board);
             default -> Map.of();
         };
 
         BoardDto boardDto = BoardDto.builder()
                 .id(board.getId())
+                .category(board.getCategory().toString())
                 .writer(WriterDto.builder()
                         .id(board.getWriter().getUser().getId())
                         .nickName(board.getWriter().getUser().getNickname())
@@ -109,6 +111,17 @@ public class BoardSerivceImpl implements BoardSerivce {
                 .build();
         return ResponseEntity.ok(boardDto);
     }
+
+    @Override
+    @Transactional
+    public ResponseEntity<Map<String, Object>> modifyBoard(Long boardId, String category, BoardDto req) {
+        Board board = boardRepository.findById(boardId).get();
+        board.getContents().setContent(req.getContents().getContent());
+        board.getContents().setTitle(req.getContents().getTitle());
+        boardRepository.save(board);
+        return ResponseEntity.ok(Map.of("success", true, "boardId", board.getId()));
+    }
+
     private Map<String, Object> getMoimBoardInfo(Board board) {
         MoimBoard moimBoard = (MoimBoard) board;
         return Map.of("commentList", "commentList");

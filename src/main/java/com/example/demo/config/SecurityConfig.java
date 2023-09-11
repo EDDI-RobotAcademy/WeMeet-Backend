@@ -64,7 +64,7 @@ public class SecurityConfig {
                             .permitAll();
                     authorizeRequests.requestMatchers("/user", "/moim", "/moim/{id}/user", "/travel/country/list", "/travel/city/list", "/travel/option/list", "/payment/moim/{moimId}", "/moim/list/**", "/board/moim/**", "/board/list/moim/**", "/board/{category}/{boardId}")
                             .hasAnyRole("NORMAL", "ADMIN");
-                    authorizeRequests.requestMatchers("/jwt/refresh", "/user/sign-out")
+                    authorizeRequests.requestMatchers("/jwt/refresh", "/user/sign-out", "/board/{category}/{boardId}")
                             .authenticated();
                     authorizeRequests.requestMatchers("/travel", "/travel/country/list")
                             .hasAnyRole("ADMIN");
