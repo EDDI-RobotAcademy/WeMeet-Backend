@@ -1,10 +1,7 @@
 package com.example.demo.payment.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @AllArgsConstructor
@@ -16,8 +13,12 @@ public class Installment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Setter
     private Long amount;
     private String merchantUid;
-    @ManyToOne
+    @Setter
+    private String receipt_url;
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
     private Payment payment;
 }

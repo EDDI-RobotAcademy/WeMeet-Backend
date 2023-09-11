@@ -1,6 +1,8 @@
 package com.example.demo.moim.repository;
 
 import com.example.demo.moim.entity.Moim;
+import com.example.demo.moim.entity.MoimPaymentInfo;
+import com.example.demo.user.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,5 +28,7 @@ public interface MoimRepository extends JpaRepository<Moim, Long>, JpaSpecificat
     @Query("select m from Moim m join fetch m.moimPaymentInfo where m.id=:moimId")
     Optional<Moim> findByIdJoinFetchPaymentInfo(Long moimId);
 
+    @Query("select m from Moim m join fetch  m.participantsInfo mp left join mp.participants p where m.id=:moimId and :user = p.user")
+    Moim findByUserAndMoimId(User user, Long moimId);
 }
 

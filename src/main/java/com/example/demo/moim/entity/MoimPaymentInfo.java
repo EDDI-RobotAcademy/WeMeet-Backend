@@ -24,6 +24,7 @@ public class MoimPaymentInfo {
     @Setter
     private Long amountInstallment;
     private Integer numInstallments;
+    @Setter
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "paymentInfo")
     private List<Payment> paymentList;
 }

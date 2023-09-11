@@ -1,6 +1,7 @@
 package com.example.demo.payment.controller;
 
 import com.example.demo.payment.controller.dto.PaymentReqForm;
+import com.example.demo.payment.controller.dto.WebHookToken;
 import com.example.demo.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +23,7 @@ public class PaymentController {
         return paymentService.firstPay(moimId, reqForm);
     }
     @PostMapping("/hook")
-    public ResponseEntity<Map<String, Object>> webHook(@RequestBody Map requestMap) {
-        return paymentService.webHook(requestMap);
-    }
-
-    @GetMapping
-    public void secondaryPay() {
-        paymentService.secondaryPay();
+    public ResponseEntity<Map<String, Object>> webHook(@RequestBody WebHookToken token) {
+        return paymentService.webHook(token);
     }
 }
