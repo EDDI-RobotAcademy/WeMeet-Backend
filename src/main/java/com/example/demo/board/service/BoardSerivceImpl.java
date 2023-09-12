@@ -26,6 +26,7 @@ import java.util.Map;
 public class BoardSerivceImpl implements BoardSerivce {
     final BoardRepository boardRepository;
     final MoimRepository moimRepository;
+
     @Override
     @Transactional
     public ResponseEntity<BoardDto> post(Long moimId, BoardDto req) {
@@ -36,12 +37,12 @@ public class BoardSerivceImpl implements BoardSerivce {
                 .build();
 
         BoardContents contents = BoardContents.builder()
-                .title(req.getContents().getTitle())
                 .content(req.getContents().getContent())
                 .build();
 
         MoimBoard board = MoimBoard.builder()
-                .category(BoardCategory.valueOf(req.getCategory()))
+                .category(BoardCategory.valueOf(req.getCategory().toUpperCase()))
+                .title(req.getTitle())
                 .contents(contents)
                 .commentList(new ArrayList<>())
                 .isPublic(req.getIsPublic())
@@ -58,7 +59,6 @@ public class BoardSerivceImpl implements BoardSerivce {
                 .id(board.getId())
                 .contents(BoardContentsDto.builder()
                         .content(board.getContents().getContent())
-                        .title(board.getContents().getTitle())
                         .build())
                 .build();
 
@@ -68,31 +68,27 @@ public class BoardSerivceImpl implements BoardSerivce {
     @Override
     public ResponseEntity<List<BoardDto>> getMoimBoardList(Long moimId, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
-        List<MoimBoard> boardList =boardRepository.findAllMoimBoardWithPageable(moimId, pageable);
-        List<BoardDto> responseDtoList = boardList.stream().map((b)->
+        List<MoimBoard> boardList = boardRepository.findAllMoimBoardWithPageable(moimId, pageable);
+        List<BoardDto> responseDtoList = boardList.stream().map((b) ->
                 BoardDto.builder()
                         .id(b.getId())
                         .category(b.getCategory().toString())
                         .isPublic(b.getIsPublic())
-                        .contents(
-                                BoardContentsDto.builder()
-                                        .title(b.getContents().getTitle())
-                                        .build()
-                        )
+
                         .writer(WriterDto.builder()
                                 .id(b.getWriter().getUser().getId())
                                 .nickName(b.getWriter().getUser().getNickname())
                                 .build())
                         .build()
-                ).toList();
+        ).toList();
         return ResponseEntity.ok(responseDtoList);
     }
 
     @Override
     @Transactional
-    public ResponseEntity<BoardDto> getBoard(Long boardId, String category) {
+    public ResponseEntity<BoardDto> getBoard(Long boardId) {
         Board board = boardRepository.findById(boardId).get();
-        Map<String, Object> addtionalInfo = switch (category) {
+        Map<String, Object> addtionalInfo = switch (board.getCategory().toString()) {
             case "MOIM" -> getMoimBoardInfo(board);
             default -> Map.of();
         };
@@ -106,21 +102,22 @@ public class BoardSerivceImpl implements BoardSerivce {
                         .build())
                 .contents(BoardContentsDto.builder()
                         .content(board.getContents().getContent())
-                        .title(board.getContents().getTitle())
                         .build())
+                .title(board.getTitle())
                 .build();
         return ResponseEntity.ok(boardDto);
     }
 
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> modifyBoard(Long boardId, String category, BoardDto req) {
+    public ResponseEntity<Map<String, Object>> modifyBoard(Long boardId, BoardDto req) {
         Board board = boardRepository.findById(boardId).get();
         board.getContents().setContent(req.getContents().getContent());
-        board.getContents().setTitle(req.getContents().getTitle());
+        board.setTitle(req.getTitle());
         boardRepository.save(board);
         return ResponseEntity.ok(Map.of("success", true, "boardId", board.getId()));
     }
+
 
     private Map<String, Object> getMoimBoardInfo(Board board) {
         MoimBoard moimBoard = (MoimBoard) board;

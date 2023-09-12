@@ -11,6 +11,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class BoardDto {
+    private String title;
     private Long id;
     private String category;
     private BoardContentsDto contents;

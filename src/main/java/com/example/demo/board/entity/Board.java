@@ -1,9 +1,6 @@
 package com.example.demo.board.entity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -22,6 +19,8 @@ public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Setter
+    private String title;
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Writer writer;
     @Enumerated(value = EnumType.STRING)
