@@ -24,15 +24,19 @@ public class MoimController {
         return moimService.createMoim(reqForm);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<MoimDto> getMoim(@PathVariable Long id) {
-        return moimService.requestMoim(id);
+    @GetMapping("/{moimId}")
+    public ResponseEntity<MoimDto> getMoim(@PathVariable Long moimId) {
+        return moimService.requestMoim(moimId);
     }
-    @PostMapping("/{id}/user")
-    public ResponseEntity<MoimDto> JoinMoim(@PathVariable Long id) {
-        return moimService.joinMoim(id);
+    @PostMapping("/{moimId}/user")
+    public ResponseEntity<MoimDto> JoinMoim(@PathVariable Long moimId) {
+        return moimService.joinMoim(moimId);
     }
 
+    @DeleteMapping("/{moimId}/user")
+    public ResponseEntity<Map<String, Object>> withdrawMoim(@PathVariable Long moimId) {
+        return moimService.withdrawMoim(moimId);
+    }
 
     @GetMapping(value = "/list", params = {"page", "size"})
     public ResponseEntity<List<MoimDto>> getRecentMoimList(@RequestParam Integer page, @RequestParam Integer size) {
@@ -45,4 +49,5 @@ public class MoimController {
         log.info("getJoinable()");
         return moimService.getJoinable(id);
     }
+
 }

@@ -12,7 +12,7 @@ public class BoardContents {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String title;
+    @Setter
     private String content;
     @OneToOne(fetch = FetchType.LAZY)
     @Setter

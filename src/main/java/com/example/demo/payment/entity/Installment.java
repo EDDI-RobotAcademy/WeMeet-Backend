@@ -17,6 +17,8 @@ public class Installment {
     private Long amount;
     private String merchantUid;
     @Setter
+    private String impUid;
+    @Setter
     private String receipt_url;
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)

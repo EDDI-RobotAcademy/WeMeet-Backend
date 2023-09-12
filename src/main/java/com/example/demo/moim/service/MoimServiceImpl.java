@@ -3,10 +3,10 @@ package com.example.demo.moim.service;
 import com.example.demo.moim.controller.form.MoimReqForm;
 import com.example.demo.moim.controller.form.dto.*;
 import com.example.demo.moim.controller.form.moimReqForm.OptionInfo;
-import com.example.demo.moim.controller.form.moimReqForm.ParticipantsInfo;
 import com.example.demo.moim.entity.*;
 import com.example.demo.moim.repository.MoimRepository;
 import com.example.demo.moim.repository.ParticipantRepository;
+import com.example.demo.payment.service.PaymentService;
 import com.example.demo.security.costomUser.CustomUserDetails;
 import com.example.demo.travel.entity.Airport;
 import com.example.demo.travel.repository.TravelRepository;
@@ -32,6 +32,7 @@ public class MoimServiceImpl implements MoimService {
     final MoimRepository moimRepository;
     final ParticipantRepository participantRepository;
     final TravelRepository travelRepository;
+    final PaymentService paymentService;
 
     @Override
     @Transactional
@@ -71,7 +72,7 @@ public class MoimServiceImpl implements MoimService {
                 .totalPrice(reqForm.getOptionsInfo().stream().map(OptionInfo::getOptionPrice).reduce(Long::sum).orElse(0L))
                 .numInstallments(reqForm.getStateInfo().getRunwayPeriod())
                 .build();
-        paymentInfo.setAmountInstallment(paymentInfo.getTotalPrice()/ paymentInfo.getNumInstallments());
+        paymentInfo.setAmountInstallment(paymentInfo.getTotalPrice() / paymentInfo.getNumInstallments());
 
         MoimParticipantsInfo participantsInfo = MoimParticipantsInfo.builder()
                 .maxNumOfUsers(reqForm.getParticipantsInfo().getMaxParticipants())
@@ -115,7 +116,7 @@ public class MoimServiceImpl implements MoimService {
                     .country(savedMoim.getDestination().getCountry())
                     .city(savedMoim.getDestination().getCity())
                     .departureAirport(savedMoim.getDestination().getDepartureAirport())
-                    .options(savedMoim.getDestination().getMoimOptions().stream().map((o)-> MoimOptionDto.builder()
+                    .options(savedMoim.getDestination().getMoimOptions().stream().map((o) -> MoimOptionDto.builder()
                             .id(o.getId())
                             .optionName(o.getOptionName())
                             .optionPrice(o.getOptionPrice())
@@ -151,7 +152,7 @@ public class MoimServiceImpl implements MoimService {
             MoimParticipantsInfoDto participantsInfoDto = MoimParticipantsInfoDto.builder()
                     .maxNumOfUsers(participantsInfo.getMaxNumOfUsers())
                     .minNumOfUsers(participantsInfo.getMinNumOfUsers())
-                    .participants(participantsInfo.getParticipants().stream().map((p)-> ParticipantDto.builder()
+                    .participants(participantsInfo.getParticipants().stream().map((p) -> ParticipantDto.builder()
                             .id(p.getId())
                             .user(UserDto.builder()
                                     .id(p.getUser().getId())
@@ -251,5 +252,29 @@ public class MoimServiceImpl implements MoimService {
         }
         return ResponseEntity.ok()
                 .body(responseMap);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<Map<String, Object>> withdrawMoim(Long moimId) {
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+
+        Optional<Moim> maybeMoim = moimRepository.findById(moimId);
+        if (maybeMoim.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        Moim moim = maybeMoim.get();
+        Participant participant = participantRepository.findByUserAndMoimId(user, moimId);
+
+        // payment withdraw procedure
+        paymentService.withdraw(participant, moim);
+
+        List<Participant> participantsList = moim.getParticipantsInfo().getParticipants();
+        participantsList.remove(participant);
+        moimRepository.save(moim);
+
+        participantRepository.delete(participant);
+
+        return ResponseEntity.ok(Map.of("success", true));
     }
 }

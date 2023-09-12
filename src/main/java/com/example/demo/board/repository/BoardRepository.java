@@ -1,6 +1,7 @@
 package com.example.demo.board.repository;
 
 import com.example.demo.board.entity.Board;
+import com.example.demo.board.entity.BoardCategory;
 import com.example.demo.board.entity.MoimBoard;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +19,10 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
             "left join fetch b.writer.user " +
             "where b.id=:boardId")
     Board findByMoimId(Long boardId);
+
+    @Query("select qb from QnaBoard qb join fetch qb.writer.user join fetch qb.contents")
+    List<MoimBoard> findAllQnaBoardListWithPageable(Pageable pageable);
+
+    @Query("select b from Board b join fetch b.writer.user where b.category=:boardCategory")
+    List<Board> findAllByCategoryAndPageable(BoardCategory boardCategory, Pageable pageable);
 }
