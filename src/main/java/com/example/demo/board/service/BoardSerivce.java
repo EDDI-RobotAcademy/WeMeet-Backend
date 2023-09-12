@@ -14,4 +14,8 @@ public interface BoardSerivce {
     ResponseEntity<BoardDto> getBoard(Long boardId);
 
     ResponseEntity<Map<String, Object>> modifyBoard(Long boardId, BoardDto req);
+
+    ResponseEntity<Map<String, Object>> postBoard(String category, BoardDto req);
+
+    ResponseEntity<List<BoardDto>> getBoardList(String category, Integer page, Integer size);
 }

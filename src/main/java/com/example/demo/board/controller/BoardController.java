@@ -34,11 +34,12 @@ public class BoardController {
     public ResponseEntity<Map<String, Object>> modifyBoard(@PathVariable Long boardId, @RequestBody BoardDto req) {
         return boardSerivce.modifyBoard(boardId, req);
     }
-
-    @PostMapping("/qna")
-    public ResponseEntity<BoardDto> postQnaBoard(@RequestBody BoardDto req) {
-        return boardSerivce.postQnaBoard(req);
+    @PostMapping("/{category}")
+    public ResponseEntity<Map<String, Object>> postBoard(@PathVariable String category, @RequestBody BoardDto req) {
+        return boardSerivce.postBoard(category, req);
     }
-
-
+    @GetMapping(value = "/list/{category}", params = {"page", "size"})
+    public ResponseEntity<List<BoardDto>> getBoardList(@PathVariable String category, @RequestParam Integer page, @RequestParam Integer size) {
+        return boardSerivce.getBoardList(category, page, size);
+    }
 }
