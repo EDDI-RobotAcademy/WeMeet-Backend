@@ -15,4 +15,6 @@ public interface MoimService {
     ResponseEntity<List<MoimDto>> getRecentMoimList(Integer page, Integer size);
 
     ResponseEntity<Map<String, Object>> getJoinable(Long id);
+
+    ResponseEntity<Map<String, Object>> withdrawMoim(Long moimId);
 }

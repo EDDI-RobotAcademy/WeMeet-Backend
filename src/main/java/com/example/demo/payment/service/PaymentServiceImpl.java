@@ -5,7 +5,6 @@ import com.example.demo.moim.entity.MoimPaymentInfo;
 import com.example.demo.moim.entity.Participant;
 import com.example.demo.moim.repository.MoimRepository;
 import com.example.demo.moim.repository.ParticipantRepository;
-import com.example.demo.payment.controller.dto.InstallmentInfoToken;
 import com.example.demo.payment.controller.dto.PaymentReqForm;
 import com.example.demo.payment.controller.dto.WebHookToken;
 import com.example.demo.payment.entity.Installment;
@@ -31,10 +30,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -123,6 +119,71 @@ public class PaymentServiceImpl implements PaymentService {
         return ResponseEntity.ok().build();
     }
 
+    @Override
+    public Boolean withdraw(Participant participant, Moim moim) {
+        Payment payment = paymentRepository.findByParticipantAndMoim(participant, moim);
+        List<Installment> installments = payment.getInstallments();
+        installmentRepository.deleteAll(installments);
+        //기능 아직 구현 못함
+        // api 이슈 확인 WMB-22
+//        cancelReservedPay(installments);
+        cancelPaidInstallments(installments);
+        paymentRepository.delete(payment);
+        return true;
+    }
+
+    private void cancelReservedPay(List<Installment> installments) {
+        Installment reservedPay = installments.stream().filter((i) -> i.getReceipt_url() == null).findFirst().orElse(null);
+        if (reservedPay != null) {
+            String url = "https://api/iamport.kr/subscribe/payments/unschedule";
+            String accessToken = getAccessToken();
+            UriComponents uri = UriComponentsBuilder.fromHttpUrl(url).build();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Authorization", "Bearer " + accessToken);
+
+            RestTemplate restTemplate = new RestTemplate();
+            String merchantUid = reservedPay.getMerchantUid();
+            String customerUid = reservedPay.getPayment().getCustomerUid();
+
+            JsonArray merchantArray = new JsonArray();
+            merchantArray.add(merchantUid);
+
+            JsonObject requestJson = new JsonObject();
+            requestJson.add("merchant_uid", merchantArray);
+            requestJson.addProperty("customer_uid", customerUid);
+
+            HttpEntity requestEntity = new HttpEntity<String>(requestJson.toString(), headers);
+            ResponseEntity<Map> responseEntity = restTemplate.exchange(uri.toString(), HttpMethod.POST, requestEntity, Map.class);
+        }
+    }
+
+    private void cancelPaidInstallments(List<Installment> installments) {
+        installments.stream().filter((i) -> i.getReceipt_url() != null).forEach(this::cancelPaidInstallment);
+    }
+
+    private void cancelPaidInstallment(Installment installment) {
+        String accessToken = getAccessToken();
+        String url = "https://api.iamport.kr/payments/cancel";
+        UriComponents uri = UriComponentsBuilder.fromHttpUrl(url).build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authorization", "Bearer " + accessToken);
+
+        RestTemplate restTemplate = new RestTemplate();
+        String merchantUid = installment.getMerchantUid();
+        String reason = "고객 환불";
+
+        JsonObject requestJson = new JsonObject();
+        requestJson.addProperty("merchant_uid", merchantUid);
+        requestJson.addProperty("reason", reason);
+
+        HttpEntity requestEntity = new HttpEntity<String>(requestJson.toString(), headers);
+        ResponseEntity<Map> responseEntity = restTemplate.exchange(uri.toString(), HttpMethod.POST, requestEntity, Map.class);
+    }
+
     private void reserveNextPay(WebHookToken token) {
         String accessToken = getAccessToken();
         String url = "https://api.iamport.kr/subscribe/payments/schedule";
@@ -142,7 +203,7 @@ public class PaymentServiceImpl implements PaymentService {
         String merchantUid = UUID.randomUUID().toString();
         schedulesData.addProperty("merchant_uid", merchantUid);
         // millisecond to second 하기 위해 1000 나눠
-        schedulesData.addProperty("schedule_at", Timestamp.valueOf(LocalDateTime.now().plusMinutes(2)).getTime() / 1000);
+        schedulesData.addProperty("schedule_at", Timestamp.valueOf(LocalDateTime.now().plusMinutes(1)).getTime() / 1000);
         log.info(String.valueOf(Timestamp.valueOf(LocalDateTime.now().plusMinutes(2)).getTime() / 1000));
         schedulesData.addProperty("amount", payment.getPaymentInfo().getAmountInstallment());
         schedulesData.addProperty("name", "get-moim");
@@ -182,7 +243,7 @@ public class PaymentServiceImpl implements PaymentService {
         ResponseEntity<Map> installmentResponseMap = restTemplate.exchange(uri.toString(), HttpMethod.GET, requestEntity, Map.class);
         Map<String, Map<String, Object>> responseBody = installmentResponseMap.getBody();
         Map<String, Object> responseMap = responseBody.get("response");
-
+        log.info(responseMap.toString());
         Long amount = ((Integer) responseMap.get("amount")).longValue();
         String receiptUrl = (String) responseMap.get("receipt_url");
 
@@ -190,43 +251,9 @@ public class PaymentServiceImpl implements PaymentService {
         installment.setAmount(amount);
         installment.setReceipt_url(receiptUrl);
         installmentRepository.save(installment);
+        installment.setImpUid(token.getImp_uid());
 
         ResponseEntity<Map> responseEntity = restTemplate.exchange(uri.toString(), HttpMethod.POST, requestEntity, Map.class);
-    }
-
-    private void reserveNextPay() {
-    }
-
-    private void reserveNextPay(Payment payment, int i) {
-
-//        log.info("reserveNextPay()");
-//        String accessToken = getAccessToken();
-//        String url = "https://api.iamport.kr/subscribe/payments/schedule";
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//        headers.add("Authorization", "Bearer " + accessToken);
-//
-//        JsonObject requestJson = new JsonObject();
-//        requestJson.addProperty("customer_uid", payment.getCustomerUid());
-//
-//        JsonObject schedulesData = new JsonObject();
-//        schedulesData.addProperty("merchant_uid", UUID.randomUUID().toString());
-//        // millisecond to second 하기 위해 1000 나눠
-//        schedulesData.addProperty("schedule_at", Timestamp.valueOf(LocalDateTime.now().plusMinutes(i)).getTime() / 1000);
-//        log.info(String.valueOf(Timestamp.valueOf(LocalDateTime.now().plusMinutes(i)).getTime() / 1000));
-//        schedulesData.addProperty("amount", payment.getInstallment().get(0).getAmount());
-//        schedulesData.addProperty("name", "get-moim");
-//
-//        JsonArray jsonArray = new JsonArray();
-//        jsonArray.add(schedulesData);
-//        requestJson.add("schedules", jsonArray);
-//        System.out.println(requestJson);
-//        HttpEntity requestEntity = new HttpEntity<String>(requestJson.toString(), headers);
-//
-//        UriComponents uri = UriComponentsBuilder.fromHttpUrl(url).build();
-//        RestTemplate restTemplate = new RestTemplate();
-//        ResponseEntity<Map> responseEntity = restTemplate.exchange(uri.toString(), HttpMethod.POST, requestEntity, Map.class);
     }
 
     private String getAccessToken() {

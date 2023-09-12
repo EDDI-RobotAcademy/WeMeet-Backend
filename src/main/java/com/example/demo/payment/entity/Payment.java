@@ -29,7 +29,7 @@ public class Payment {
     private String pgProvider;
     private String payMethod;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "payment")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "payment", orphanRemoval = true)
     private List<Installment> installments;
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private MoimPaymentInfo paymentInfo;

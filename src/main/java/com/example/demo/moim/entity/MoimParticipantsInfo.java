@@ -19,7 +19,7 @@ public class MoimParticipantsInfo {
     private Integer maxNumOfUsers;
     private Integer minNumOfUsers;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Participant> participants;
     @Formula("(select count(1) from participant p where p.moim_participants_info_id = id)")
     private Integer currentParticipantsNumber;
