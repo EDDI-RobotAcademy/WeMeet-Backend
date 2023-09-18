@@ -12,17 +12,21 @@ import com.example.demo.travel.entity.Airport;
 import com.example.demo.travel.repository.TravelRepository;
 import com.example.demo.user.controller.form.UserDto;
 import com.example.demo.user.entity.User;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -276,5 +280,46 @@ public class MoimServiceImpl implements MoimService {
         participantRepository.delete(participant);
 
         return ResponseEntity.ok(Map.of("success", true));
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<Page<MoimDto>> getAdvanceSerchedList(Integer page, Integer size, String country, String city, String departureAirport, Integer[] rangeTotalPrice, Integer[] rangeNumOfInstallment, Integer[] rangeInstallment, LocalDateTime[] travelDates) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+
+        Specification<Moim> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (country != null) {
+                predicates.add(criteriaBuilder.equal(root.get("destination").get("country"), country));
+            }
+            if (city != null) {
+                predicates.add(criteriaBuilder.equal(root.get("destination").get("city"), city));
+            }
+            if (departureAirport != null) {
+                predicates.add(criteriaBuilder.equal(root.get("destination").get("departureAirport"), Airport.valueOf(departureAirport)));
+            }
+            if (rangeTotalPrice != null) {
+                predicates.add(criteriaBuilder.between(root.get("moimPaymentInfo").get("totalPrice"), rangeTotalPrice[0] * 10000, rangeTotalPrice[1] * 10000));
+            }
+            if (rangeNumOfInstallment != null) {
+                predicates.add(criteriaBuilder.between(root.get("moimPaymentInfo").get("numInstallments"), rangeNumOfInstallment[0], rangeNumOfInstallment[1]));
+            }
+            if (rangeTotalPrice != null) {
+                predicates.add(criteriaBuilder.between(root.get("moimPaymentInfo").get("amountInstallment"), rangeInstallment[0] * 10000, rangeInstallment[1] * 10000));
+            }
+            if (travelDates != null) {
+                predicates.add(criteriaBuilder.greaterThan(root.get("state").get("departureDate"), travelDates[0]));
+                predicates.add(criteriaBuilder.lessThan(root.get("state").get("returnDate"), travelDates[1]));
+            }
+                return criteriaBuilder.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+        Page<Moim> moimPage = moimRepository.findAll(spec, pageable);
+        Page<MoimDto> moimDtoPage = moimPage.map(m -> MoimDto.builder()
+                .id(m.getId())
+                .moimContents(MoimContentsDto.builder()
+                        .title(m.getContents().getTitle())
+                        .build())
+                .build());
+        return ResponseEntity.ok(moimDtoPage);
     }
 }

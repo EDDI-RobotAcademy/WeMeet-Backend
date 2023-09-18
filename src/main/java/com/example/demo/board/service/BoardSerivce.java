@@ -18,4 +18,6 @@ public interface BoardSerivce {
     ResponseEntity<Map<String, Object>> postBoard(String category, BoardDto req);
 
     ResponseEntity<List<BoardDto>> getBoardList(String category, Integer page, Integer size);
+
+    ResponseEntity<Map<String, Object>> deleteBoard(Long boardId);
 }

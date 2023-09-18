@@ -1,4 +1,5 @@
 package com.example.demo.board.entity;
+import com.example.demo.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -21,15 +22,16 @@ public class Board {
     private Long id;
     @Setter
     private String title;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    private Writer writer;
+    @OneToOne(fetch = FetchType.LAZY)
+    private User writer;
     @Enumerated(value = EnumType.STRING)
     private BoardCategory category;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private BoardContents contents;
     @CreationTimestamp
     private LocalDateTime createdDate;
     @UpdateTimestamp
     private LocalDateTime modifiedDate;
     private Boolean isPublic;
+    private Boolean isDeleted;
 }
