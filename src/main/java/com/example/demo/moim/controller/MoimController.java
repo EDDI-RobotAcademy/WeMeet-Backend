@@ -5,9 +5,12 @@ import com.example.demo.moim.controller.form.dto.MoimDto;
 import com.example.demo.moim.service.MoimService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +31,7 @@ public class MoimController {
     public ResponseEntity<MoimDto> getMoim(@PathVariable Long moimId) {
         return moimService.requestMoim(moimId);
     }
+
     @PostMapping("/{moimId}/user")
     public ResponseEntity<MoimDto> JoinMoim(@PathVariable Long moimId) {
         return moimService.joinMoim(moimId);
@@ -50,4 +54,17 @@ public class MoimController {
         return moimService.getJoinable(id);
     }
 
+    @GetMapping(value = "/list/advanced-search")
+    public ResponseEntity<Page<MoimDto>> getAdvancedList(
+            @RequestParam Integer page,
+            @RequestParam Integer size,
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String departureAirport,
+            @RequestParam(required = false) Integer[] rangeTotalPrice,
+            @RequestParam(required = false) Integer[] rangeNumOfInstallment,
+            @RequestParam(required = false) Integer[] rangeInstallment,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime[] travelDates) {
+        return moimService.getAdvanceSerchedList(page, size, country, city, departureAirport, rangeTotalPrice, rangeNumOfInstallment, rangeInstallment, travelDates);
+    }
 }
