@@ -7,11 +7,10 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
-@Entity
+@AllArgsConstructor
 @NoArgsConstructor
+@Entity
 @SuperBuilder
-@DiscriminatorValue(value="qna")
-public class QnaBoard extends Board{
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, mappedBy = "board")
-    private List<Comment> comments;
+@DiscriminatorValue(value="faq")
+public class FaqBoard extends Board{
 }
