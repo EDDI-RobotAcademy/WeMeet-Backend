@@ -19,7 +19,7 @@ public class Comment {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    private Writer writer;
+    private User writer;
 
     private String contents;
     @ManyToOne(fetch = FetchType.LAZY)
