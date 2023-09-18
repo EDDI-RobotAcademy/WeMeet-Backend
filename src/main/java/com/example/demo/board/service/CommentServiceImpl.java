@@ -50,4 +50,11 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.save(comment);
         return ResponseEntity.ok(Map.of("success", true));
     }
+
+    @Override
+    public ResponseEntity<Map<String, Object>> deleteComment(Long commentId) {
+        Comment comment = commentRepository.findById(commentId).get();
+        commentRepository.delete(comment);
+        return ResponseEntity.ok(Map.of("success", true));
+    }
 }

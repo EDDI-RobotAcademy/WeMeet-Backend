@@ -10,4 +10,6 @@ public interface CommentService {
     ResponseEntity<List<CommentDto>> getCommentList(Long boardId);
 
     ResponseEntity<Map<String, Object>> postComment(Long boardId, CommentDto req);
+
+    ResponseEntity<Map<String, Object>> deleteComment(Long commentId);
 }
