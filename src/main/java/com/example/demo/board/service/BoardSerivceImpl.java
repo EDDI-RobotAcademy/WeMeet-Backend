@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -32,10 +33,6 @@ public class BoardSerivceImpl implements BoardSerivce {
     public ResponseEntity<BoardDto> post(Long moimId, BoardDto req) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        Writer writer = Writer.builder()
-                .user(user)
-                .build();
-
         BoardContents contents = BoardContents.builder()
                 .content(req.getContents().getContent())
                 .build();
@@ -47,10 +44,10 @@ public class BoardSerivceImpl implements BoardSerivce {
                 .commentList(new ArrayList<>())
                 .isPublic(req.getIsPublic())
                 .moim(moimRepository.findById(moimId).get())
-                .writer(writer)
+                .writer(user)
+                .isDeleted(false)
                 .build();
 
-        writer.setBoard(board);
         contents.setBoard(board);
         boardRepository.save(board);
 
@@ -74,10 +71,10 @@ public class BoardSerivceImpl implements BoardSerivce {
                         .id(b.getId())
                         .category(b.getCategory().toString())
                         .isPublic(b.getIsPublic())
-
+                        .isDeleted(b.getIsDeleted())
                         .writer(WriterDto.builder()
-                                .id(b.getWriter().getUser().getId())
-                                .nickName(b.getWriter().getUser().getNickname())
+                                .id(b.getWriter().getId())
+                                .nickName(b.getWriter().getNickname())
                                 .build())
                         .build()
         ).toList();
@@ -87,18 +84,20 @@ public class BoardSerivceImpl implements BoardSerivce {
     @Override
     @Transactional
     public ResponseEntity<BoardDto> getBoard(Long boardId) {
-        Board board = boardRepository.findById(boardId).get();
+        Board board = (Board) boardRepository.findById(boardId).get();
         Map<String, Object> addtionalInfo = switch (board.getCategory().toString()) {
             case "MOIM" -> getMoimBoardInfo(board);
             default -> Map.of();
         };
-
+        if (board.getIsDeleted()) {
+            return ResponseEntity.noContent().build();
+        }
         BoardDto boardDto = BoardDto.builder()
                 .id(board.getId())
                 .category(board.getCategory().toString())
                 .writer(WriterDto.builder()
-                        .id(board.getWriter().getUser().getId())
-                        .nickName(board.getWriter().getUser().getNickname())
+                        .id(board.getWriter().getId())
+                        .nickName(board.getWriter().getNickname())
                         .build())
                 .contents(BoardContentsDto.builder()
                         .content(board.getContents().getContent())
@@ -112,7 +111,7 @@ public class BoardSerivceImpl implements BoardSerivce {
     @Override
     @Transactional
     public ResponseEntity<Map<String, Object>> modifyBoard(Long boardId, BoardDto req) {
-        Board board = boardRepository.findById(boardId).get();
+        Board board = (Board) boardRepository.findById(boardId).get();
         board.getContents().setContent(req.getContents().getContent());
         board.setTitle(req.getTitle());
         boardRepository.save(board);
@@ -123,22 +122,18 @@ public class BoardSerivceImpl implements BoardSerivce {
     public ResponseEntity<Map<String, Object>> postBoard(String category, BoardDto req) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        Writer writer = Writer.builder()
-                .user(user)
-                .build();
 
         BoardContents contents = BoardContents.builder()
                 .content(req.getContents().getContent())
                 .build();
 
         Board board = switch (category) {
-            case "qna" ->
-                postQnaBoard(req, contents, writer);
-            case "faq" -> null;
+            case "qna" -> postQnaBoard(req, contents, user);
+            case "review" -> postReviewBoard(req, contents, user);
+            case "faq" -> postFaqBoard(req, contents, user);
             default -> null;
         };
 
-        writer.setBoard(board);
         contents.setBoard(board);
         boardRepository.save(board);
 
@@ -152,31 +147,68 @@ public class BoardSerivceImpl implements BoardSerivce {
                 "board", boardDto));
     }
 
+    private Board postFaqBoard(BoardDto req, BoardContents contents, User user) {
+        FaqBoard board = FaqBoard.builder()
+                .isDeleted(false)
+                .isPublic(true)
+                .title(req.getTitle())
+                .writer(user)
+                .contents(contents)
+                .build();
+        return (Board) boardRepository.save(board);
+    }
+
+    private Board postReviewBoard(BoardDto req, BoardContents contents, User user) {
+        ReviewBoard board = ReviewBoard.builder()
+                .isPublic(true)
+                .title(req.getTitle())
+                .category(BoardCategory.valueOf(req.getCategory().toUpperCase()))
+                .writer(user)
+                .isDeleted(false)
+                .contents(contents)
+                .build();
+        return (Board) boardRepository.save(board);
+    }
+
     @Override
     public ResponseEntity<List<BoardDto>> getBoardList(String category, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
         List<Board> boardList = boardRepository.findAllByCategoryAndPageable(BoardCategory.valueOf(category.toUpperCase()), pageable);
-        List<BoardDto> responseList = boardList.stream().map(b->{
+        List<BoardDto> responseList = boardList.stream().map(b -> {
             return BoardDto.builder()
                     .id(b.getId())
                     .title(b.getTitle())
                     .writer(WriterDto.builder()
-                            .id(b.getWriter().getUser().getId())
-                            .nickName(b.getWriter().getUser().getNickname())
+                            .id(b.getWriter().getId())
+                            .nickName(b.getWriter().getNickname())
                             .build())
                     .build();
         }).toList();
         return ResponseEntity.ok(responseList);
     }
 
-    private Board postQnaBoard(BoardDto req, BoardContents contents, Writer writer) {
-        QnaBoard board =  QnaBoard.builder()
+    @Override
+    public ResponseEntity<Map<String, Object>> deleteBoard(Long boardId) {
+        Optional<Board> maybeBoard = boardRepository.findById(boardId);
+        if (maybeBoard.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        Board savedBoard = maybeBoard.get();
+        boardRepository.delete(savedBoard);
+        return ResponseEntity.ok()
+                .body(Map.of("success", true));
+    }
+
+    private Board postQnaBoard(BoardDto req, BoardContents contents, User writer) {
+        QnaBoard board = QnaBoard.builder()
                 .category(BoardCategory.valueOf(req.getCategory().toUpperCase()))
                 .title(req.getTitle())
                 .contents(contents)
-                .commentList(new ArrayList<>())
+                .comments(new ArrayList<>())
                 .isPublic(req.getIsPublic())
                 .writer(writer)
+                .isDeleted(false)
                 .build();
         boardRepository.save(board);
         return board;

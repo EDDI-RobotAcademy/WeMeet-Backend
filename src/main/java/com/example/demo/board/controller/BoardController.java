@@ -42,4 +42,8 @@ public class BoardController {
     public ResponseEntity<List<BoardDto>> getBoardList(@PathVariable String category, @RequestParam Integer page, @RequestParam Integer size) {
         return boardSerivce.getBoardList(category, page, size);
     }
+    @DeleteMapping(value="/{boardId}")
+    public ResponseEntity<Map<String, Object>> deleteBoard(@PathVariable Long boardId) {
+        return boardSerivce.deleteBoard(boardId);
+    }
 }
